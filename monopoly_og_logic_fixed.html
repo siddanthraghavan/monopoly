@@ -1,0 +1,1159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Local Monopoly</title>
+<style>
+:root{
+  --bg:#070706;--panel:#171510;--panel2:#201d16;--ink:#f7f1e6;--muted:#b9ad98;--line:#3b321f;--gold:#d5b653;--green:#39d773;--red:#e45a52;--blue:#55a6dc;--cream:#ddd2bc;--board:#c3b79f;
+  --p1:#d8b957;--p2:#e45a52;--p3:#55a6dc;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{width:100%;min-height:100%;background:radial-gradient(circle at 18% 4%,#1b170d 0%,#080807 42%,#050505 100%);color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;user-select:none}
+button,input,select{font:inherit}
+button{cursor:pointer;border:none}
+.screen{display:none}.screen.active{display:block}
+#setup.screen.active{min-height:100dvh;padding:clamp(16px,3vw,40px);overflow:auto}
+.setup-shell{min-height:calc(100dvh - 80px);display:grid;grid-template-columns:minmax(340px,1fr) minmax(420px,1.16fr);gap:28px;align-items:stretch;max-width:1420px;margin:0 auto}
+.hero-card,.setup-card{background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012));border:1px solid var(--line);border-radius:24px;box-shadow:0 30px 80px rgba(0,0,0,.38);padding:clamp(28px,4vw,52px);overflow:hidden}
+.eyebrow{font-size:13px;letter-spacing:.38em;color:var(--muted);font-weight:800;margin-bottom:22px}.hero-title{font-size:clamp(64px,8vw,112px);line-height:.84;font-weight:900;letter-spacing:-.075em;white-space:nowrap}.hero-title span,.brand span,.center-logo span{color:var(--gold)}.hero-sub{font-size:22px;line-height:1.45;color:#d2c8b8;margin-top:28px;max-width:560px}.hero-foot{margin-top:auto;border-top:1px solid rgba(213,182,83,.22);padding-top:22px;color:var(--muted);line-height:1.45}.hero-card{display:flex;flex-direction:column}.setup-card{display:flex;flex-direction:column;gap:22px}.setup-title{letter-spacing:.35em;color:var(--muted);font-weight:900;font-size:14px}.player-setup{display:grid;gap:14px}.setup-row{display:grid;grid-template-columns:72px minmax(160px,1fr);gap:16px;align-items:center;background:rgba(255,255,255,.025);border:1px solid rgba(213,182,83,.2);border-radius:18px;padding:14px}.p-badge{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;color:#090909;font-weight:900}.row-main{display:grid;gap:10px}.row-top{display:grid;grid-template-columns:minmax(120px,1fr);align-items:center;gap:12px}.name-input{height:46px;border:1px solid rgba(213,182,83,.32);border-radius:12px;background:#080807;color:var(--ink);padding:0 16px;font-size:19px;font-weight:700;outline:none}.token-grid{display:grid;grid-template-columns:repeat(10,36px);gap:7px}.token-choice{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(160deg,#fbf5dc,#a99250);border:1px solid rgba(0,0,0,.35);box-shadow:inset 0 1px 2px rgba(255,255,255,.75),0 2px 8px rgba(0,0,0,.35)}.token-choice svg{width:22px;height:22px;fill:#111}.token-choice.selected{outline:3px solid var(--ink);outline-offset:2px}.settings{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;margin-top:4px}.field label{display:block;color:var(--muted);font-size:12px;letter-spacing:.32em;font-weight:900;margin-bottom:8px}.field input,.field select{width:100%;height:48px;border:1px solid rgba(213,182,83,.32);border-radius:10px;background:#080807;color:var(--ink);padding:0 12px;font-size:18px;font-weight:700}.primary-btn,.ghost-btn{height:56px;border-radius:14px;font-weight:900;letter-spacing:.25em;text-transform:uppercase}.primary-btn{background:#f6efe2;color:#111}.ghost-btn{background:transparent;color:#eee;border:1px solid rgba(213,182,83,.3)}
+#game.screen.active{height:100dvh;overflow:hidden;display:grid;grid-template-rows:46px 1fr;background:#060606}.topbar{height:46px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 12px}.brand{letter-spacing:.38em;font-size:11px;color:var(--gold);font-weight:900}.turn-head{font-size:18px;font-weight:900;margin-left:12px}.top-left,.top-actions{display:flex;align-items:center;gap:10px}.pill-btn{height:34px;padding:0 18px;border-radius:20px;background:#0d0b08;color:var(--ink);border:1px solid rgba(213,182,83,.34);font-size:11px;font-weight:900;letter-spacing:.22em}.game-shell{height:calc(100dvh - 46px);display:grid;grid-template-columns:340px minmax(0,1fr);gap:22px;padding:16px 22px 18px;overflow:hidden}.side{display:grid;grid-template-rows:repeat(3,minmax(0,1fr));gap:12px;min-height:0;padding-left:10px;overflow:hidden;padding-bottom:8px}.player-card{background:linear-gradient(180deg,#191711,#0c0b09);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-height:0;min-width:0;transition:border-color .2s,box-shadow .2s}.player-card.active{border-color:var(--green);box-shadow:0 0 0 1px rgba(57,215,115,.45),0 0 24px rgba(57,215,115,.12)}.player-top{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid rgba(213,182,83,.16);min-height:56px}.mini-token{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:#eee6d4;box-shadow:inset 0 1px 2px rgba(255,255,255,.65),0 2px 7px rgba(0,0,0,.45)}.mini-token svg{width:23px;height:23px;fill:#111}.player-name{font-size:17px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tag{margin-left:auto;padding:8px 14px;border-radius:18px;background:var(--green);color:#001806;font-size:11px;font-weight:900;letter-spacing:.18em}.money-box{padding:12px 16px 10px 22px}.label{color:var(--muted);font-size:10px;letter-spacing:.34em;font-weight:900}.money-val{font-size:34px;line-height:1;font-weight:900;letter-spacing:-.035em;margin-top:5px;padding-left:.04em}.player-card.active .money-val{font-size:38px}.money-val.gain{animation:gain .45s}.money-val.loss{animation:loss .45s}@keyframes gain{50%{color:#51e689;transform:scale(1.04)}}@keyframes loss{50%{color:#ff6860;transform:scale(1.04)}}.player-card.money-gain{animation:cardGain .7s ease}.player-card.money-loss{animation:cardLoss .7s ease}@keyframes cardGain{40%{box-shadow:0 0 0 2px rgba(82,233,137,.8),0 0 32px rgba(82,233,137,.28)}}@keyframes cardLoss{40%{box-shadow:0 0 0 2px rgba(255,102,96,.75),0 0 32px rgba(255,102,96,.22)}}.history-round{margin:18px 0 6px;color:var(--gold);font-size:13px;font-weight:900;letter-spacing:.28em;text-align:left}.trade-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.list-row.selected{border-color:var(--green);box-shadow:0 0 0 1px rgba(57,215,115,.45);background:#102015}.meta{margin-top:8px;color:var(--muted);font-size:12px;font-weight:900;letter-spacing:.2em}.card-action-trigger{margin:auto 16px 10px 22px;height:38px;border-radius:12px;background:#0b0a08;color:var(--ink);border:1px solid rgba(213,182,83,.3);font-size:12px;font-weight:900;letter-spacing:.24em;text-transform:uppercase}.card-action-trigger:active{transform:scale(.985);background:#17130d}.asset-strip{padding:0 16px 10px 22px}.asset-empty{height:30px;border-radius:10px;border:1px dashed rgba(213,182,83,.25);display:grid;place-items:center;color:#817765;font-size:10px;font-weight:900;letter-spacing:.22em}.asset-chip{display:flex;align-items:center;gap:8px;height:30px;border-radius:9px;background:#0b0a08;border:1px solid rgba(213,182,83,.24);padding:0 10px;font-size:11px;font-weight:800;overflow:hidden}.asset-color{width:7px;height:22px;border-radius:5px;flex:0 0 auto}.board-stage{min-width:0;min-height:0;display:grid;place-items:center;padding:8px}.board-wrap{position:relative;width:min(calc(100dvh - 92px),calc(100vw - 380px));height:min(calc(100dvh - 92px),calc(100vw - 380px));max-width:920px;max-height:920px;min-width:520px;min-height:520px;border-radius:18px;border:3px solid #4b4536;box-shadow:0 24px 70px rgba(0,0,0,.58);background:var(--board);overflow:hidden}#boardSvg{width:100%;height:100%;display:block}.tokens{position:absolute;inset:0;pointer-events:none}.tok{position:absolute;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;transform:translate(-50%,-50%);transition:none;filter:drop-shadow(0 5px 7px rgba(0,0,0,.34));background:#eee6d4;border:3px solid #f8f3e8;will-change:left,top,transform;backface-visibility:hidden}.tok svg{width:28px;height:28px;fill:#111}.tok.jailed{background:#4f4b42;border-color:#a79e8c;box-shadow:inset 0 0 0 2px rgba(0,0,0,.22)}.tok.jailed svg{opacity:.52;filter:grayscale(1)}.tok.jailed:after{content:'🔒';position:absolute;right:-8px;top:-10px;font-size:14px}.tok.step-hop{animation:pieceHop .18s cubic-bezier(.2,.75,.2,1)}@keyframes pieceHop{0%{transform:translate(-50%,-50%) scale(.96)}45%{transform:translate(-50%,-66%) scale(1.04)}100%{transform:translate(-50%,-50%) scale(1)}}.center-ui{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(44%,390px);min-width:290px;max-height:88%;overflow:auto;background:linear-gradient(180deg,#232017,#0d0c0a);border:2px solid rgba(213,182,83,.28);border-radius:26px;box-shadow:0 24px 55px rgba(0,0,0,.38);padding:16px;display:grid;gap:9px;text-align:center}.center-logo{font-size:clamp(28px,3vw,38px);line-height:.92;font-weight:900;letter-spacing:-.055em;white-space:nowrap;overflow:hidden;text-overflow:clip}.instruction{border:1px solid rgba(213,182,83,.4);border-radius:14px;min-height:36px;display:grid;place-items:center;padding:6px 10px;color:#f2e5b6;font-size:13px;font-weight:800;line-height:1.2}.dice-tray{height:98px;border-radius:20px;background:#070706;border:2px solid rgba(213,182,83,.28);display:flex;align-items:center;justify-content:center;gap:18px;cursor:pointer}.dice-tray.ready{box-shadow:0 0 0 2px rgba(57,215,115,.35),0 0 24px rgba(57,215,115,.12)}.die{width:68px;height:68px;border-radius:15px;background:radial-gradient(circle at 30% 20%,#fffaf0,#d4cab7 72%,#9f9687 100%);box-shadow:inset 0 2px 3px rgba(255,255,255,.7),inset 0 -8px 12px rgba(0,0,0,.12),0 7px 0 #8c8376,0 12px 16px rgba(0,0,0,.32);display:grid;place-items:center}.die svg{width:38px;height:38px;fill:#14120f}.dice-tray.rolling .die{animation:diceTumble .13s linear infinite}@keyframes diceTumble{50%{transform:translateY(-4px) rotate(6deg)}}.turn-name{min-height:42px;border-radius:14px;background:rgba(213,182,83,.08);border:1px solid rgba(213,182,83,.35);display:grid;place-items:center;padding:6px 10px;font-size:20px;line-height:1.05;font-weight:900}.action-grid{display:grid;gap:8px}.action-grid.split{grid-template-columns:1fr 1fr}.action-grid button{min-height:40px;border-radius:13px;font-size:15px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.buy{background:#bbefc9;color:#092514}.auction{background:#efd476;color:#1a1305}.pass,.end{background:#12100d;color:#f8f1e6;border:1px solid rgba(213,182,83,.25)}.log-card{min-height:42px;max-height:58px;display:grid;place-items:center;padding:6px 10px;border-radius:14px;background:#d7d0c3;color:#191715;font-size:13px;font-weight:800;line-height:1.15;overflow:hidden}.cash-float{position:fixed;z-index:900;font-size:28px;font-weight:900;color:#52e989;pointer-events:none;animation:cashFly .9s ease-out forwards}@keyframes cashFly{to{transform:translateY(-36px);opacity:0}}.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:800;display:none;align-items:center;justify-content:center;padding:24px}.modal.open{display:flex}.modal-card{width:min(520px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow:auto;background:#17140f;border:1px solid var(--line);border-radius:22px;box-shadow:0 30px 90px rgba(0,0,0,.6);padding:24px;text-align:center}.modal-card h2{font-size:30px;line-height:1.05;margin-bottom:12px}.modal-card p{color:#d1c8b8;line-height:1.45}.modal-actions{display:grid;gap:10px;margin-top:18px}.modal-actions button{height:50px;border-radius:12px;font-weight:900;letter-spacing:.18em}.list{display:grid;gap:9px;margin-top:14px}.list-row{background:#0d0b08;border:1px solid rgba(213,182,83,.24);border-radius:12px;padding:12px;text-align:left}.row-title{font-weight:900}.row-sub{color:var(--muted);font-size:13px;margin-top:2px}.close{position:absolute;right:16px;top:16px;width:46px;height:46px;border-radius:50%;background:#0b0a08;border:1px solid rgba(213,182,83,.3);color:#fff;font-size:24px}.corner-flash{position:absolute;font-weight:900;color:#3cf083;font-size:28px;pointer-events:none;animation:cashFly 1s ease-out forwards;z-index:20}
+.winner-box{display:grid;gap:10px;text-align:center}.winner-crown{font-size:48px;line-height:1}.winner-name{font-size:34px;font-weight:900;color:var(--gold);line-height:1.05}.celebration-dot{position:fixed;width:10px;height:10px;border-radius:50%;z-index:1200;pointer-events:none;animation:celebrate .9s ease-out forwards}@keyframes celebrate{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}.debt-total{font-size:42px;font-weight:900;color:var(--red);line-height:1;margin:8px 0 4px}.debt-actions{display:grid;gap:9px;margin-top:14px}.debt-actions .list-row{cursor:pointer}.bankrupt-card{opacity:.55;filter:grayscale(.7)}.bankrupt-badge{margin-left:auto;padding:7px 12px;border-radius:18px;background:#5b1915;color:#ffd9d6;font-size:11px;font-weight:900;letter-spacing:.18em}
+.buy-card{border:1px solid rgba(213,182,83,.32);border-radius:16px;background:rgba(8,8,7,.74);overflow:hidden;text-align:left}
+.buy-head{padding:9px 12px;border-bottom:1px solid rgba(213,182,83,.2)}
+.deed-stripe{height:10px;border-radius:999px;margin-bottom:10px;background:#777}
+.buy-title{font-size:16px;font-weight:900;line-height:1.05;color:var(--ink)}
+.buy-meta{margin-top:5px;color:var(--muted);font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.rent-grid{display:grid;grid-template-columns:1fr auto;gap:0;padding:6px 12px 9px}
+.rent-grid div{padding:4px 0;border-bottom:1px solid rgba(213,182,83,.12);font-size:12px;color:#e8dfcf}
+.rent-grid div:nth-child(even){font-weight:900;text-align:right;color:#fff}
+.build-note{margin-top:8px;padding:9px 10px;border-radius:10px;background:rgba(213,182,83,.08);color:#e8dfcf;font-size:12px;line-height:1.35}
+
+.card-badge{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:0 14px;border-radius:999px;background:rgba(213,182,83,.12);border:1px solid rgba(213,182,83,.32);color:#f2e5b6;font-size:12px;font-weight:900;letter-spacing:.22em;text-transform:uppercase;margin-bottom:12px}
+.deck-count{margin-top:10px;color:var(--muted);font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
+.status-ok{color:#53e58d}.status-warn{color:#efd476}.status-bad{color:#ff7770}.small-action{font-size:11px;letter-spacing:.16em;min-height:44px}
+
+@media(max-width:1100px){.game-shell{grid-template-columns:270px 1fr;gap:14px;padding:12px 14px 14px}.side{padding-left:6px;gap:9px}.board-wrap{width:min(calc(100dvh - 82px),calc(100vw - 326px));height:min(calc(100dvh - 82px),calc(100vw - 326px));min-width:450px;min-height:450px}.player-card.active .money-val{font-size:34px}.money-val{font-size:30px}.center-ui{width:min(42%,330px);min-width:255px;padding:14px}.center-logo{font-size:32px}.turn-name{font-size:18px}.die{width:58px;height:58px}.dice-tray{height:82px}.action-grid button{font-size:14px;min-height:38px}.log-card{font-size:12px}.setup-shell{grid-template-columns:1fr;max-width:820px}.hero-card{min-height:360px}}
+@media(max-width:760px){#game.screen.active{height:auto;min-height:100dvh;overflow:auto}.game-shell{height:auto;grid-template-columns:1fr;overflow:visible}.side{display:grid;grid-template-rows:auto;grid-template-columns:1fr;order:2;padding-left:0;overflow:visible}.board-wrap{width:min(96vw,calc(100dvh - 64px));height:min(96vw,calc(100dvh - 64px));min-width:0;min-height:0}.center-ui{width:52%;min-width:230px;padding:14px;border-radius:22px;gap:9px}.center-logo{font-size:30px}.instruction{font-size:13px;min-height:36px}.dice-tray{height:62px;border-radius:16px}.die{width:42px;height:42px;border-radius:10px}.die svg{width:26px;height:26px}.turn-name{font-size:18px;min-height:42px}.action-grid button{font-size:14px;min-height:42px}.log-card{font-size:12px;min-height:42px}.top-actions .pill-btn{padding:0 10px}.setup-shell{display:block}.setup-card,.hero-card{margin-bottom:16px;padding:22px}.hero-title{font-size:56px}.settings{grid-template-columns:1fr}.token-grid{grid-template-columns:repeat(5,36px)}.trade-grid{grid-template-columns:1fr}}
+
+
+
+/* Clean block-based board-centre layout: every element sits in its own safe block */
+.center-ui{
+  position:absolute;
+  left:13.7%;
+  right:13.7%;
+  top:13.7%;
+  bottom:13.7%;
+  width:auto;
+  min-width:0;
+  max-height:none;
+  transform:none;
+  overflow:hidden;
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  padding:18px;
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(172px,.78fr);
+  grid-template-rows:auto auto minmax(102px,1fr) auto auto;
+  grid-template-areas:
+    "logo logo"
+    "instruction instruction"
+    "dice property"
+    "turn property"
+    "actions log";
+  gap:10px;
+  text-align:center;
+  pointer-events:none;
+}
+.center-ui > *{pointer-events:auto;min-width:0}
+.center-logo{
+  grid-area:logo;
+  position:static;
+  transform:none;
+  width:100%;
+  font-size:clamp(28px,4.1vw,54px);
+  line-height:.86;
+  letter-spacing:-.06em;
+  color:#f7f1e6;
+  text-shadow:0 4px 20px rgba(0,0,0,.38);
+  white-space:nowrap;
+  overflow:hidden;
+}
+.instruction{
+  grid-area:instruction;
+  position:static;
+  transform:none;
+  width:100%;
+  min-height:40px;
+  padding:8px 16px;
+  border-radius:16px;
+  background:rgba(18,18,16,.92);
+  border:1px solid rgba(213,182,83,.42);
+  color:#f6e6ad;
+  font-size:14px;
+  font-weight:800;
+  line-height:1.16;
+  display:grid;
+  place-items:center;
+  box-shadow:0 10px 26px rgba(0,0,0,.22);
+}
+.dice-tray{
+  grid-area:dice;
+  position:static;
+  transform:none;
+  width:100%;
+  height:100%;
+  min-height:118px;
+  border-radius:24px;
+  background:#050504;
+  border:2px solid rgba(213,182,83,.32);
+  box-shadow:0 18px 44px rgba(0,0,0,.34), inset 0 0 0 1px rgba(255,255,255,.04);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:24px;
+  cursor:pointer;
+}
+.dice-tray.ready{box-shadow:0 0 0 2px rgba(57,215,115,.34),0 18px 44px rgba(0,0,0,.35),0 0 30px rgba(57,215,115,.12)}
+.die{width:78px;height:78px;border-radius:18px}.die svg{width:42px;height:42px}
+.turn-name{
+  grid-area:turn;
+  position:static;
+  transform:none;
+  width:100%;
+  min-height:48px;
+  border-radius:16px;
+  background:rgba(18,18,16,.9);
+  border:1px solid rgba(213,182,83,.42);
+  padding:8px 14px;
+  font-size:20px;
+  line-height:1.05;
+  font-weight:900;
+  display:grid;
+  place-items:center;
+  box-shadow:0 12px 30px rgba(0,0,0,.24);
+}
+.property-panel{
+  grid-area:property;
+  position:static;
+  transform:none;
+  width:100%;
+  min-height:0;
+  display:none;
+  text-align:left;
+  overflow:auto;
+}
+.property-panel.active{display:block}
+.property-panel .buy-card{height:100%;background:rgba(8,8,7,.92);border-color:rgba(213,182,83,.38);box-shadow:0 16px 40px rgba(0,0,0,.24)}
+.property-panel .buy-head{padding:10px 12px}.property-panel .buy-title{font-size:16px}.property-panel .buy-meta{font-size:10px;letter-spacing:.14em}.property-panel .rent-grid{padding:6px 12px 10px}.property-panel .rent-grid div{font-size:10.5px;padding:3px 0}.property-panel .deed-stripe{height:8px}
+.action-grid{
+  grid-area:actions;
+  position:static;
+  transform:none;
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+  align-self:end;
+}
+.action-grid:empty{display:none}
+.action-grid button{min-height:42px;font-size:14px;border-radius:14px;letter-spacing:.11em}
+.action-grid .small-action{min-height:38px;font-size:11px}
+.log-card{
+  grid-area:log;
+  position:static;
+  width:100%;
+  min-height:42px;
+  max-height:86px;
+  display:grid;
+  place-items:center;
+  padding:8px 12px;
+  border-radius:14px;
+  font-size:12.5px;
+  line-height:1.16;
+  background:rgba(229,223,211,.94);
+  color:#191715;
+  box-shadow:0 16px 38px rgba(0,0,0,.18);
+  overflow:hidden;
+}
+@media(max-width:1100px){
+  .center-ui{padding:14px;gap:8px;grid-template-columns:minmax(0,1fr) minmax(144px,.76fr);grid-template-rows:auto auto minmax(82px,1fr) auto auto}
+  .center-logo{font-size:clamp(24px,3.1vw,38px)}
+  .instruction{font-size:12px;min-height:34px;padding:6px 10px}
+  .dice-tray{min-height:92px;gap:16px;border-radius:19px}.die{width:58px;height:58px}.die svg{width:32px;height:32px}
+  .turn-name{font-size:16px;min-height:38px}
+  .action-grid{gap:6px}.action-grid button{font-size:12.5px;min-height:36px}
+  .property-panel .buy-title{font-size:13px}.property-panel .rent-grid div{font-size:9.5px;padding:2px 0}.property-panel .buy-meta{font-size:9px}
+  .log-card{font-size:10.5px;min-height:38px;max-height:52px}
+}
+@media(max-width:760px){
+  .center-ui{left:13.6%;right:13.6%;top:13.6%;bottom:13.6%;padding:10px;gap:6px;grid-template-columns:1fr;grid-template-rows:auto minmax(58px,1fr) auto auto;grid-template-areas:"logo" "dice" "turn" "actions"}
+  .center-logo{font-size:22px}.instruction{display:none}
+  .dice-tray{min-height:58px;border-radius:14px}.die{width:40px;height:40px;border-radius:10px}.die svg{width:25px;height:25px}
+  .turn-name{font-size:13px;min-height:32px;border-radius:11px}
+  .property-panel{display:none}.property-panel.active{display:none}
+  .action-grid{gap:5px}.action-grid button{min-height:30px;font-size:10.5px;border-radius:10px}
+  .log-card{display:none}
+}
+
+
+
+/* Compact setup screen refinement */
+#setup.screen.active{
+  min-height:100dvh;
+  padding:18px;
+  overflow:auto;
+}
+.setup-shell{
+  min-height:auto;
+  max-width:980px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:300px minmax(420px,1fr);
+  gap:18px;
+  align-items:start;
+}
+.hero-card,.setup-card{
+  border-radius:18px;
+  padding:24px;
+  box-shadow:0 18px 48px rgba(0,0,0,.32);
+}
+.hero-card{
+  min-height:0;
+  justify-content:space-between;
+}
+.eyebrow{
+  font-size:10px;
+  letter-spacing:.28em;
+  margin-bottom:14px;
+}
+.hero-title{
+  font-size:52px;
+  line-height:.88;
+  letter-spacing:-.06em;
+}
+.hero-sub{
+  font-size:15px;
+  line-height:1.4;
+  margin-top:14px;
+  max-width:260px;
+}
+.hero-foot{
+  margin-top:22px;
+  padding-top:14px;
+  font-size:13px;
+}
+.setup-card{
+  gap:14px;
+}
+.setup-title{
+  font-size:11px;
+  letter-spacing:.28em;
+}
+.player-setup{
+  gap:10px;
+}
+.setup-row{
+  grid-template-columns:48px minmax(0,1fr);
+  gap:12px;
+  padding:10px;
+  border-radius:14px;
+}
+.p-badge{
+  width:42px;
+  height:42px;
+  font-size:13px;
+}
+.row-main{
+  gap:8px;
+  min-width:0;
+}
+.name-input{
+  height:38px;
+  border-radius:10px;
+  font-size:15px;
+  padding:0 12px;
+}
+.token-grid{
+  grid-template-columns:repeat(10,30px);
+  gap:5px;
+}
+.token-choice{
+  width:30px;
+  height:30px;
+}
+.token-choice svg{
+  width:18px;
+  height:18px;
+}
+.settings{
+  gap:10px;
+}
+.field label{
+  font-size:10px;
+  letter-spacing:.22em;
+  margin-bottom:6px;
+}
+.field input,.field select{
+  height:40px;
+  border-radius:9px;
+  font-size:15px;
+}
+.primary-btn,.ghost-btn{
+  height:44px;
+  border-radius:11px;
+  font-size:12px;
+  letter-spacing:.18em;
+}
+@media(max-width:900px){
+  .setup-shell{
+    max-width:620px;
+    grid-template-columns:1fr;
+    gap:14px;
+  }
+  .hero-card{
+    min-height:0;
+  }
+  .hero-title{
+    font-size:46px;
+  }
+  .hero-sub,.hero-foot{
+    max-width:none;
+  }
+}
+@media(max-width:560px){
+  #setup.screen.active{
+    padding:12px;
+  }
+  .hero-card,.setup-card{
+    padding:18px;
+  }
+  .token-grid{
+    grid-template-columns:repeat(5,30px);
+  }
+  .settings{
+    grid-template-columns:1fr;
+  }
+}
+
+</style>
+</head>
+<body>
+<section id="setup" class="screen active">
+  <div class="setup-shell">
+    <div class="hero-card"><div><div class="eyebrow">LOCAL TABLE GAME</div><div class="hero-title">MONO<span>POLY</span></div><p class="hero-sub">A clean local Monopoly game for shared iPad play.</p></div><div class="hero-foot">Build rule: a colour unlocks once every property in that colour is bought.</div></div>
+    <div class="setup-card"><div class="setup-title">PLAYERS</div><div id="setupRows" class="player-setup"></div><div class="setup-title">GAME SETTINGS</div><div class="settings"><div class="field"><label>Starting Money</label><input id="startMoney" type="number" min="500" step="100" value="1500"></div><div class="field"><label>Build Rule</label><select id="buildRule"><option value="soldout">Colour sold out</option><option value="ownedset">Traditional full set</option></select></div></div><p class="hero-foot">OG rules are locked: auctions on, Free Parking has no jackpot, mortgages transfer with interest. Only the building unlock rule is customisable.</p><button class="primary-btn" onclick="Game.startGame()">Start Game</button><button id="continueBtn" class="ghost-btn" onclick="Game.continueGame()">Continue Saved Game</button><button class="ghost-btn" onclick="Game.clearSave()">Clear Saved Game</button></div>
+  </div>
+</section>
+<section id="game" class="screen">
+  <div class="topbar"><div class="top-left"><div class="brand">LOCAL <span>MONOPOLY</span></div><div id="headerTurn" class="turn-head">Ready</div></div><div class="top-actions"><button class="pill-btn" onclick="Game.showHistory()">History</button><button class="pill-btn" onclick="Game.showRules()">Rules</button><button class="pill-btn" onclick="Game.resetToSetup()">New Game</button></div></div>
+  <div class="game-shell"><aside id="players" class="side"></aside><main class="board-stage"><div id="boardWrap" class="board-wrap"><svg id="boardSvg" viewBox="0 0 560 560"></svg><div id="tokenLayer" class="tokens"></div><div id="centerUI" class="center-ui"><div class="center-logo">MONO<span>POLY</span></div><div id="instruction" class="instruction">Tap the dice to roll.</div><div id="diceTray" class="dice-tray" role="button" tabindex="0" aria-label="Roll dice" onclick="Game.rollDice()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();Game.rollDice()}"><div id="die1" class="die"></div><div id="die2" class="die"></div></div><div id="turnName" class="turn-name">Player 1</div><div id="propertyPanel" class="property-panel" aria-live="polite"></div><div id="actions" class="action-grid"></div><div id="logCard" class="log-card" aria-live="polite">Ready.</div></div></div></main></div>
+</section>
+<div id="modal" class="modal" onclick="Game.backdrop(event)"><div id="modalCard" class="modal-card"></div></div>
+<script>
+(()=>{
+'use strict';
+const B=560,CO=76,EW=(B-2*CO)/9,GO=200,FACE=[null,1,2,3,4,5,6];
+const SAVE_VERSION=7,SAVE_KEY='cleanMonopoly';
+const PCOL=['#d8b957','#e45a52','#55a6dc'];
+const COLORS={brown:'#97583a',lightblue:'#9dd5e2',pink:'#c34c8b',orange:'#dc8d35',red:'#c54340',yellow:'#d8c54e',green:'#56ad72',darkblue:'#3c7aa6',station:'#121212',utility:'#81887d'};
+const ICONS={hat:'<svg viewBox="0 0 64 64"><path d="M16 46h32c5 0 8 3 8 7v3H8v-3c0-4 3-7 8-7Zm8-26c0-5 3-9 8-9s8 4 8 9v18H24V20Zm-8 17h32c3 0 6 2 6 5H10c0-3 3-5 6-5Z"/></svg>',car:'<svg viewBox="0 0 64 64"><path d="M14 38l5-13c1-4 4-6 8-6h10c4 0 7 2 8 6l5 13h4c2 0 4 2 4 4v9H6v-9c0-2 2-4 4-4h4Zm8-1h20l-3-9c-1-2-2-3-5-3h-4c-3 0-4 1-5 3l-3 9Zm-2 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm24 0a6 6 0 1 1 0-12 6 6 0 0 1 0 12Z"/></svg>',ship:'<svg viewBox="0 0 64 64"><path d="M30 7h6v10h12v8H36v20h20c-3 8-10 12-24 12S11 53 8 45h22V25H18v-8h12V7Zm-8 26l8-7v16H14l8-9Z"/></svg>',dog:'<svg viewBox="0 0 64 64"><path d="M15 37c0-10 7-18 17-18h11l7-8 5 4-4 8 5 8-5 5-7-5h-5v20h-8V37h-6v14h-8V37h-2Z"/></svg>',boot:'<svg viewBox="0 0 64 64"><path d="M18 7h19v26l12 5c6 3 9 7 9 13v5H10v-8c0-5 4-9 8-9V7Zm0 40v2h30c-1-2-3-3-5-4l-12-5H20c-1 2-2 4-2 7Z"/></svg>',iron:'<svg viewBox="0 0 64 64"><path d="M9 44c4-17 17-28 37-28h6v34H8l1-6Zm12-4h23V24c-10 1-18 7-23 16Zm25-28h8v5h-8v-5Z"/></svg>',thimble:'<svg viewBox="0 0 64 64"><path d="M20 16c0-7 5-12 12-12s12 5 12 12l6 39H14l6-39Zm7 4h4v4h-4v-4Zm10 0h4v4h-4v-4Zm-13 10h4v4h-4v-4Zm10 0h4v4h-4v-4Zm-5 11h4v4h-4v-4Zm10 0h4v4h-4v-4Z"/></svg>',barrow:'<svg viewBox="0 0 64 64"><path d="M10 20h31l-5 18H18l-8-18Zm32 1 12-6 2 5-11 6-3-5ZM23 53a7 7 0 1 1 0-14 7 7 0 0 1 0 14Zm26-17h8v5h-8v-5Z"/></svg>',cannon:'<svg viewBox="0 0 64 64"><path d="M13 36 42 20l9 16-29 16-9-16Zm3 21a7 7 0 1 1 0-14 7 7 0 0 1 0 14Zm30 0a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg>',cat:'<svg viewBox="0 0 64 64"><path d="M17 22 10 8l15 7a22 22 0 0 1 14 0l15-7-7 14c5 5 7 11 7 18 0 12-10 20-22 20S10 52 10 40c0-7 2-13 7-18Zm7 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm16 0a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>'};
+const TOKENS=Object.keys(ICONS);
+const SP=[{n:'GO',l:'GO',t:'go'},{n:'Old Kent Road',l:'OLD\nKENT',t:'p',g:'brown',price:60,r:[2,10,30,90,160,250],hc:50},{n:'Community Chest',l:'CHEST',t:'cc'},{n:'Whitechapel Road',l:'WHITE.',t:'p',g:'brown',price:60,r:[4,20,60,180,320,450],hc:50},{n:'Income Tax',l:'TAX',t:'tax',tax:200},{n:"King's Cross Station",l:"KING'S",t:'st',price:200},{n:'The Angel, Islington',l:'ANGEL',t:'p',g:'lightblue',price:100,r:[6,30,90,270,400,550],hc:50},{n:'Chance',l:'CHANCE',t:'ch'},{n:'Euston Road',l:'EUSTON',t:'p',g:'lightblue',price:100,r:[6,30,90,270,400,550],hc:50},{n:'Pentonville Road',l:'PENTON',t:'p',g:'lightblue',price:120,r:[8,40,100,300,450,600],hc:50},{n:'Jail / Just Visiting',l:'JAIL',t:'jail'},{n:'Pall Mall',l:'PALL',t:'p',g:'pink',price:140,r:[10,50,150,450,625,750],hc:100},{n:'Electric Company',l:'POWER',t:'ut',price:150},{n:'Whitehall',l:'WHITE',t:'p',g:'pink',price:140,r:[10,50,150,450,625,750],hc:100},{n:'Northumberland Avenue',l:'NORTH.',t:'p',g:'pink',price:160,r:[12,60,180,500,700,900],hc:100},{n:'Marylebone Station',l:'MARY',t:'st',price:200},{n:'Bow Street',l:'BOW',t:'p',g:'orange',price:180,r:[14,70,200,550,750,950],hc:100},{n:'Community Chest',l:'CHEST',t:'cc'},{n:'Marlborough Street',l:'MARL.',t:'p',g:'orange',price:180,r:[14,70,200,550,750,950],hc:100},{n:'Vine Street',l:'VINE',t:'p',g:'orange',price:200,r:[16,80,220,600,800,1000],hc:100},{n:'Free Parking',l:'FREE\nPARKING',t:'free'},{n:'Strand',l:'STRAND',t:'p',g:'red',price:220,r:[18,90,250,700,875,1050],hc:150},{n:'Chance',l:'CHANCE',t:'ch'},{n:'Fleet Street',l:'FLEET',t:'p',g:'red',price:220,r:[18,90,250,700,875,1050],hc:150},{n:'Trafalgar Square',l:'TRAF.',t:'p',g:'red',price:240,r:[20,100,300,750,925,1100],hc:150},{n:'Fenchurch Street Station',l:'FENCH.',t:'st',price:200},{n:'Leicester Square',l:'LEIC.',t:'p',g:'yellow',price:260,r:[22,110,330,800,975,1150],hc:150},{n:'Coventry Street',l:'COV.',t:'p',g:'yellow',price:260,r:[22,110,330,800,975,1150],hc:150},{n:'Water Works',l:'WATER',t:'ut',price:150},{n:'Piccadilly',l:'PICC.',t:'p',g:'yellow',price:280,r:[22,120,360,850,1025,1200],hc:150},{n:'Go To Jail',l:'GO TO\nJAIL',t:'gotojail'},{n:'Bond Street',l:'BOND',t:'p',g:'green',price:300,r:[26,130,390,900,1100,1275],hc:200},{n:'Oxford Street',l:'OXFORD',t:'p',g:'green',price:300,r:[26,130,390,900,1100,1275],hc:200},{n:'Community Chest',l:'CHEST',t:'cc'},{n:'Regent Street',l:'REGENT',t:'p',g:'green',price:320,r:[28,150,450,1000,1200,1400],hc:200},{n:'Liverpool Street Station',l:'LIVER.',t:'st',price:200},{n:'Chance',l:'CHANCE',t:'ch'},{n:'Park Lane',l:'PARK',t:'p',g:'darkblue',price:350,r:[35,175,500,1100,1300,1500],hc:200},{n:'Luxury Tax',l:'TAX',t:'tax',tax:100},{n:'Mayfair',l:'MAYF.',t:'p',g:'darkblue',price:400,r:[50,200,600,1400,1700,2000],hc:200}];
+let S={started:false,players:[],props:{},cur:0,rolled:false,phase:'ready',pending:null,dice:[1,1],moving:false,history:[],round:1,turn:1,freePot:0,decks:{ch:[],cc:[]},options:{auction:true,parking:false,build:'soldout'}};
+let saveTimer=null,prevMoney=[],tradeDraft=null;
+function $(id){return document.getElementById(id)}function svg(tag,a={}){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v));return e}
+function geom(i){if(i===0)return{x:B-CO,y:B-CO,w:CO,h:CO,s:'corner'};if(i===10)return{x:0,y:B-CO,w:CO,h:CO,s:'corner'};if(i===20)return{x:0,y:0,w:CO,h:CO,s:'corner'};if(i===30)return{x:B-CO,y:0,w:CO,h:CO,s:'corner'};if(i>=1&&i<=9)return{x:CO+(9-i)*EW,y:B-CO,w:EW,h:CO,s:'bottom'};if(i>=11&&i<=19){let r=i-11;return{x:0,y:B-CO-(r+1)*EW,w:CO,h:EW,s:'left'}}if(i>=21&&i<=29)return{x:CO+(i-21)*EW,y:0,w:EW,h:CO,s:'top'};if(i>=31&&i<=39){let r=i-31;return{x:B-CO,y:CO+r*EW,w:CO,h:EW,s:'right'}}}
+function center(i){let g=geom(i);return{x:g.x+g.w/2,y:g.y+g.h/2}}
+function readableAction(el){
+  if(el.classList.contains('token-choice'))return 'Select '+(el.dataset.token||'token')+' token';
+  const txt=(el.textContent||'').replace(/\s+/g,' ').trim();
+  if(txt)return txt;
+  if(el.id==='diceTray')return S.phase==='ready'&&!S.rolled?'Roll dice':'Dice';
+  return 'Game action';
+}
+function applyA11y(root=document){
+  root.querySelectorAll('button,[role="button"]').forEach(el=>{
+    if(!el.getAttribute('aria-label'))el.setAttribute('aria-label',readableAction(el));
+  });
+  const dice=$('diceTray');
+  if(dice)dice.setAttribute('aria-label',S.started&&S.phase==='ready'&&!S.rolled?'Roll dice':'Dice result');
+}
+function log(msg){S.history.unshift({t:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),r:S.round||1,turn:S.turn||1,p:S.cur,m:msg});S.history=S.history.slice(0,80);$('logCard').textContent=msg;scheduleSave()}
+function scheduleSave(){if(!S.started)return;clearTimeout(saveTimer);saveTimer=setTimeout(()=>{S.version=SAVE_VERSION;localStorage.setItem(SAVE_KEY,JSON.stringify(S))},350)}
+function drawSetup(){const rows=$('setupRows');rows.innerHTML='';for(let i=0;i<3;i++){const d=document.createElement('div');d.className='setup-row';d.innerHTML=`<div class="p-badge" style="background:${PCOL[i]}">P${i+1}</div><div class="row-main"><div class="row-top"><input class="name-input" value="Player ${i+1}" maxlength="12"></div><div class="token-grid">${TOKENS.map((t,j)=>`<button class="token-choice ${j===i?'selected':''}" data-row="${i}" data-token="${t}" onclick="Game.pickToken(${i},'${t}')">${ICONS[t]}</button>`).join('')}</div></div>`;d.dataset.token=TOKENS[i];rows.appendChild(d)}applyA11y(rows)}
+function pickToken(row,tok){document.querySelectorAll(`.token-choice[data-row="${row}"]`).forEach(b=>b.classList.remove('selected'));document.querySelector(`.token-choice[data-row="${row}"][data-token="${tok}"]`).classList.add('selected');$('setupRows').children[row].dataset.token=tok}
+function startGame(){const rows=[...$('setupRows').children];S={version:SAVE_VERSION,started:true,players:rows.map((r,i)=>({name:r.querySelector('input').value.trim()||`Player ${i+1}`,token:r.dataset.token||TOKENS[i],color:PCOL[i],pos:0,money:+$('startMoney').value||1500,jail:false,jailTurns:0,jailFree:0,jailCards:[],bankrupt:false})),props:{},cur:0,rolled:false,phase:'ready',pending:null,dice:[1,1],moving:false,history:[],round:1,turn:1,freePot:0,decks:initDecks(),auction:null,debt:null,options:{auction:true,parking:false,build:$('buildRule').value}};SP.forEach((sp,i)=>{if(['p','st','ut'].includes(sp.t))S.props[i]={owner:null,houses:0,hotel:false,mortgaged:false}});$('setup').classList.remove('active');$('game').classList.add('active');buildBoard();buildTokens();renderAll();log(`${S.players[0].name}, your turn.`)}
+function validSave(x){
+  if(!x||typeof x!=='object')return false;
+  if(x.version!==SAVE_VERSION)return false;
+  if(!Array.isArray(x.players)||x.players.length<2)return false;
+  if(!x.props||typeof x.props!=='object')return false;
+  if(!x.decks||!Array.isArray(x.decks.ch)||!Array.isArray(x.decks.cc))return false;
+  if(typeof x.cur!=='number'||!x.players[x.cur])return false;
+  if(!x.players.every(p=>Array.isArray(p.jailCards)))return false;
+  return true;
+}
+function continueGame(){
+  const raw=localStorage.getItem(SAVE_KEY);if(!raw)return;
+  let saved;try{saved=JSON.parse(raw)}catch(e){saved=null}
+  if(!validSave(saved)){alert('Saved game is from an older version and cannot be continued safely. Start a new game.');localStorage.removeItem(SAVE_KEY);$('continueBtn').style.display='none';return}
+  S=saved;$('setup').classList.remove('active');$('game').classList.add('active');if(S.phase==='handoff')S.phase='ready';buildBoard();buildTokens();renderAll()
+}
+function clearSave(){if(confirm('Clear saved game?'))localStorage.removeItem(SAVE_KEY)}
+function buildBoard(){const s=$('boardSvg');s.innerHTML='';s.appendChild(svg('rect',{x:0,y:0,width:B,height:B,fill:'#d9cfb9'}));s.appendChild(svg('rect',{x:CO,y:CO,width:B-2*CO,height:B-2*CO,fill:'#181a18'}));for(let i=0;i<40;i++){const sp=SP[i],g=geom(i),cell=svg('g',{'data-pos':i});cell.addEventListener('click',()=>showDeed(i));s.appendChild(cell);cell.appendChild(svg('rect',{x:g.x,y:g.y,width:g.w,height:g.h,fill:specialFill(sp),stroke:'#8d826e','stroke-width':.65}));if(sp.t==='p'||sp.t==='st'||sp.t==='ut'){const col=sp.t==='p'?COLORS[sp.g]:sp.t==='st'?COLORS.station:COLORS.utility;if(g.s==='bottom')cell.appendChild(svg('rect',{x:g.x,y:g.y,width:g.w,height:14,fill:col}));if(g.s==='top')cell.appendChild(svg('rect',{x:g.x,y:g.y+g.h-14,width:g.w,height:14,fill:col}));if(g.s==='left')cell.appendChild(svg('rect',{x:g.x+g.w-14,y:g.y,width:14,height:g.h,fill:col}));if(g.s==='right')cell.appendChild(svg('rect',{x:g.x,y:g.y,width:14,height:g.h,fill:col}))}drawLabel(cell,sp,g);cell.appendChild(svg('g',{id:'mark'+i}))}renderBoardState()}
+function specialFill(sp){if(sp.t==='ch')return '#e3ca8f';if(sp.t==='cc')return '#cfe1d0';if(sp.t==='tax')return '#dfcbc2';if(sp.t==='jail')return '#d2b85d';return '#ddd5c4'}
+function drawLabel(p,sp,g){let x=g.x+g.w/2,y=g.y+g.h/2,rot=0;if(g.s==='top')rot=180;if(g.s==='left')rot=90;if(g.s==='right')rot=-90;const wrap=svg('g',{transform:`rotate(${rot} ${x} ${y})`});p.appendChild(wrap);const lines=String(sp.l).split('\n');if(sp.t==='go'){lines.splice(0,lines.length,'← GO')}if(sp.t==='ch'){lines.splice(0,lines.length,'?','CHANCE')}if(sp.t==='cc'){lines.splice(0,lines.length,'▣','CHEST')}let fs=(g.s==='corner')?15:8.6;if(sp.t==='go'||sp.t==='jail'||sp.t==='free'||sp.t==='gotojail')fs=13;lines.forEach((ln,idx)=>{const t=svg('text',{x,y:y+(idx-(lines.length-1)/2)*fs*1.25,'font-size':fs,'font-weight':900,'text-anchor':'middle','dominant-baseline':'middle','fill':sp.t==='ch'?'#9b6e22':(sp.t==='go'||sp.t==='jail'||sp.t==='free'||sp.t==='gotojail')?'#8a342e':'#111'});t.textContent=ln;wrap.appendChild(t)})}
+function renderBoardState(){Object.entries(S.props).forEach(([k,pd])=>{const i=+k,g=geom(i),m=$('mark'+i);if(!m)return;m.innerHTML='';if(pd.owner!=null){const c=S.players[pd.owner].color;m.appendChild(svg('rect',{x:g.x+3,y:g.y+3,width:g.w-6,height:g.h-6,fill:'none',stroke:c,'stroke-width':2,rx:4}));const badge=svg('rect',{x:g.x+g.w/2-12,y:g.y+g.h-17,width:24,height:13,rx:5,fill:c,stroke:'#111','stroke-width':.8});m.appendChild(badge);const tx=svg('text',{x:g.x+g.w/2,y:g.y+g.h-10,'font-size':8,'font-weight':900,'text-anchor':'middle','dominant-baseline':'middle',fill:'#111'});tx.textContent='P'+(pd.owner+1);m.appendChild(tx)}if(pd.hotel||pd.houses){let tx=svg('text',{x:g.x+g.w/2,y:g.y+16,'font-size':10,'font-weight':900,'text-anchor':'middle',fill:pd.hotel?'#b8302e':'#178a46'});tx.textContent=pd.hotel?'HOTEL':'HOUSE'.repeat(Math.min(pd.houses,1));m.appendChild(tx)}if(pd.mortgaged){m.appendChild(svg('line',{x1:g.x+4,y1:g.y+4,x2:g.x+g.w-4,y2:g.y+g.h-4,stroke:'#111','stroke-width':2,'stroke-dasharray':'4 3'}))}})}
+function buildTokens(){const l=$('tokenLayer');l.innerHTML='';S.players.forEach((p,i)=>{const d=document.createElement('div');d.className='tok';d.id='tok'+i;d.innerHTML=ICONS[p.token];l.appendChild(d)});renderTokens()}
+function renderTokens(){const by={};S.players.forEach((p,i)=>{if(p.bankrupt)return;(by[p.pos] ||= []).push(i)});Object.values(by).forEach(ids=>ids.forEach((pi,idx)=>{const p=S.players[pi],el=$('tok'+pi),c=center(p.pos),n=ids.length,ang=(-90+idx*360/n)*Math.PI/180,r=n>1?12:0;el.style.left=((c.x+Math.cos(ang)*r)/B*100)+'%';el.style.top=((c.y+Math.sin(ang)*r)/B*100)+'%';el.style.background=p.color;el.classList.toggle('jailed',p.jail)}))}
+function renderAll(){renderPlayers();renderBoardState();renderTokens();renderDice();renderCenter();$('headerTurn').textContent=S.started?`Round ${S.round} · Turn ${S.turn} · ${S.players[S.cur].name}`:'Ready';applyA11y(document)}
+function renderPlayers(){
+  const box=$('players');
+  box.innerHTML='';
+  S.players.forEach((p,i)=>{
+    const active=i===S.cur&&!p.bankrupt;
+    const props=owned(i);
+    const worth=netWorth(i);
+    const el=document.createElement('div');
+    el.className='player-card '+(active?'active ':'')+(p.bankrupt?'bankrupt-card':'');
+    el.onclick=()=>highlightOwner(i);
+    const actions=active?`<button class="card-action-trigger" onclick="event.stopPropagation();Game.showPlayerActions()">Actions</button>`:'';
+    el.innerHTML=`
+      <div class="player-top">
+        <span class="mini-token">${ICONS[p.token]}</span>
+        <strong class="player-name">${p.name}</strong>
+        ${p.bankrupt?'<span class="bankrupt-badge">BANKRUPT</span>':active?'<span class="tag">YOUR TURN</span>':''}
+      </div>
+      <div class="money-box">
+        <div class="label">BALANCE</div>
+        <div id="money${i}" class="money-val">£${p.money.toLocaleString()}</div>
+        <div class="meta">${props.length} ASSETS · WORTH £${worth.toLocaleString()}</div>
+      </div>
+      ${actions}
+      <div class="asset-strip">${active&&props.length?assetChip(props[0]):'<div class="asset-empty">'+(props.length?'TAP CARD TO VIEW':'NO PROPERTIES YET')+'</div>'}</div>`;
+    box.appendChild(el);
+    if(prevMoney[i]!=null&&prevMoney[i]!==p.money){
+      const mv=el.querySelector('.money-val');
+      mv.classList.add(p.money>prevMoney[i]?'gain':'loss');
+      setTimeout(()=>mv.classList.remove('gain','loss'),480);
+    }
+    prevMoney[i]=p.money;
+  });
+}
+function owned(i){return Object.keys(S.props).map(Number).filter(k=>S.props[k].owner===i)}function assetChip(pos){const sp=SP[pos];return `<button class="asset-chip" onclick="event.stopPropagation();Game.showDeed(${pos})"><span class="asset-color" style="background:${sp.t==='p'?COLORS[sp.g]:'#777'}"></span>${sp.n}</button>`}
+function netWorth(i){let p=S.players[i],v=p.money;owned(i).forEach(pos=>{const sp=SP[pos],pd=S.props[pos];v+=pd.mortgaged?Math.floor(sp.price/2):sp.price;if(sp.t==='p'){v+=pd.houses*Math.floor(sp.hc/2);if(pd.hotel)v+=Math.floor(sp.hc/2)}});return Math.max(0,v)}
+function renderCenter(){
+  const p=S.players[S.cur];
+  const panel=$('propertyPanel');
+  $('turnName').textContent=`${p.name}'s turn`;
+  $('turnName').style.color=p.color;
+  $('turnName').style.borderColor=p.color;
+  $('instruction').textContent=instruction();
+  const a=$('actions');
+  a.className='action-grid';
+  a.innerHTML='';
+  if(panel){panel.innerHTML='';panel.classList.remove('active')}
+  if(S.phase==='ready'){
+    // Dice tray is the roll control.
+  }else if(S.phase==='buy'){
+    const pos=S.pending.pos,sp=SP[pos];
+    if(panel){panel.innerHTML=propertyBuyCard(pos);panel.classList.add('active')}
+    a.innerHTML=`<button class="buy" onclick="Game.buy()">Buy £${sp.price}</button><button class="auction" onclick="Game.auctionStart()">Auction</button><button class="pass" onclick="Game.passBuy()">Pass</button>`;
+  }else if(S.phase==='rent'){
+    const q=activeRentPending();
+    if(panel&&q){panel.innerHTML=propertyRentCard(q);panel.classList.add('active')}
+    a.innerHTML=`<button class="buy" onclick="Game.payRent()">Pay £${q?q.rent:''} Rent</button>`;
+  }else if(S.phase==='jailChoice'){
+    a.innerHTML=`<button class="auction" onclick="Game.rollJailDoubles()">Roll Doubles</button><button class="buy" onclick="Game.payBail()">Pay £50</button>${p.jailFree?'<button class="auction" onclick="Game.useJailFree()">Use Card</button>':''}<button class="end" onclick="Game.endTurn()">End Turn</button>`;
+  }else if(S.phase==='done'){
+    a.innerHTML=`<button class="end" onclick="Game.endTurn()">End Turn</button><button class="pass small-action" onclick="Game.showBuild()">Buildings</button>`;
+  }else if(S.phase==='debt'){
+    a.innerHTML=`<button class="pass" onclick="Game.showDebt()">Resolve Debt</button>`;
+  }else if(S.phase==='ended'){
+    a.innerHTML=`<button class="end" onclick="Game.resetToSetup()">New Game</button>`;
+  }
+}
+function instruction(){if(S.phase==='ready')return S.players[S.cur].jail?'Roll doubles, pay £50, or use card.':'Tap the dice to roll.';if(S.phase==='buy')return 'Buy this property, auction it, or pass.';if(S.phase==='rent')return 'Confirm the rent payment.';if(S.phase==='jailChoice')return `Jail turn ${Math.min((S.players[S.cur].jailTurns||0)+1,3)}/3: roll doubles, pay £50, or use a card.`;if(S.phase==='done')return 'End your turn.';if(S.phase==='debt')return 'Resolve debt before play continues.';return 'Play.'}
+function renderDice(){$('die1').innerHTML=dieSvg(S.dice[0]);$('die2').innerHTML=dieSvg(S.dice[1]);$('diceTray').classList.toggle('ready',S.phase==='ready'&&!S.rolled&&!S.moving)}
+function dieSvg(n){const dots={1:[[50,50]],2:[[32,32],[68,68]],3:[[30,30],[50,50],[70,70]],4:[[32,32],[68,32],[32,68],[68,68]],5:[[32,32],[68,32],[50,50],[32,68],[68,68]],6:[[32,27],[68,27],[32,50],[68,50],[32,73],[68,73]]}[n]||[];return `<svg viewBox="0 0 100 100" aria-hidden="true">${dots.map(d=>`<circle cx="${d[0]}" cy="${d[1]}" r="7.2"/>`).join('')}</svg>`}
+async function rollDice(){if(S.moving||S.rolled||S.phase!=='ready')return;const p=S.players[S.cur];if(p.jail){showJailOptions();return}S.rolled=true;haptic(20);$('diceTray').classList.add('rolling');for(let k=0;k<8;k++){S.dice=[rand(6),rand(6)];renderDice();await wait(k<5?46:62)}S.dice=[rand(6),rand(6)];renderDice();await wait(70);$('diceTray').classList.remove('rolling');const doubles=S.dice[0]===S.dice[1],steps=S.dice[0]+S.dice[1];log(`${p.name} rolled ${S.dice[0]} + ${S.dice[1]}. Moving ${steps} spaces.`);await moveSteps(S.cur,steps,true);landOn(doubles)}
+function rand(n){return Math.ceil(Math.random()*n)}function wait(ms){return new Promise(r=>setTimeout(r,ms))}function haptic(ms){if(navigator.vibrate)try{navigator.vibrate(ms)}catch(e){}}
+async function moveSteps(pi,steps,forward=true){if(S.moving)return;S.moving=true;try{for(let s=0;s<steps;s++){const p=S.players[pi],prev=p.pos,token=$('tok'+pi);p.pos=(p.pos+(forward?1:-1)+40)%40;if(forward&&prev===39&&p.pos===0)passGo(pi);renderTokens();if(token){token.classList.remove('step-hop');void token.offsetWidth;token.classList.add('step-hop')}await wait(185);if(token)token.classList.remove('step-hop')}}finally{S.moving=false}}
+function passGo(pi){const p=S.players[pi];changeMoney(pi,GO);highlightMoney(pi,'gain');flashAt(0,'+£200');log(`${p.name} passed GO and collected £200.`)}
+function changeMoney(i,amt){S.players[i].money+=amt;cashFlash(i,amt);scheduleSave()}
+function highlightMoney(i,type){const card=$('players').children[i];if(!card)return;card.classList.remove('money-gain','money-loss');void card.offsetWidth;card.classList.add(type==='gain'?'money-gain':'money-loss');setTimeout(()=>card.classList.remove('money-gain','money-loss'),760)}
+function cashFlash(i,amt){const card=$('players').children[i];if(!card)return;highlightMoney(i,amt>0?'gain':'loss');const r=card.getBoundingClientRect();const f=document.createElement('div');f.className='cash-float';f.textContent=(amt>0?'+':'-')+'£'+Math.abs(amt);f.style.left=(r.left+r.width*.55)+'px';f.style.top=(r.top+35)+'px';f.style.color=amt>0?'#55ef8c':'#ff6660';document.body.appendChild(f);setTimeout(()=>f.remove(),950)}
+function flashAt(pos,text){const g=geom(pos),f=document.createElement('div');f.className='corner-flash';f.textContent=text;f.style.left=((g.x+g.w/2)/B*100)+'%';f.style.top=((g.y+g.h/2)/B*100)+'%';$('boardWrap').appendChild(f);setTimeout(()=>f.remove(),1000)}
+function landOn(doubles=false){const p=S.players[S.cur],sp=SP[p.pos],pd=S.props[p.pos];renderAll();if(sp.t==='gotojail')return goJail(S.cur);if(sp.t==='tax'){payBank(S.cur,sp.tax);S.phase='done';renderAll();return}if(sp.t==='ch'||sp.t==='cc')return drawCard(sp.t);if(pd){if(pd.owner==null){S.phase='buy';S.pending={pos:p.pos,doubles};renderAll();return}if(pd.owner!==S.cur&&!pd.mortgaged){S.phase='rent';S.pending={pos:p.pos,doubles,rent:rentFor(p.pos),from:S.cur,to:pd.owner};renderAll();log(`${p.name} owes ${S.players[pd.owner].name} £${S.pending.rent} for ${sp.n}.`);return}}if(doubles){S.rolled=false;log(`${p.name} rolled doubles. Roll again.`)}else S.phase='done';renderAll();scheduleSave()}
+function rentFor(pos){const sp=SP[pos],pd=S.props[pos];if(sp.t==='st'){let n=owned(pd.owner).filter(k=>SP[k].t==='st').length;return [25,50,100,200][n-1]||25}if(sp.t==='ut'){let n=owned(pd.owner).filter(k=>SP[k].t==='ut').length;return (S.dice[0]+S.dice[1])*(n>1?10:4)}let lvl=pd.hotel?5:pd.houses,base=sp.r[lvl];let group=groupProps(sp.g),mono=group.every(k=>S.props[k].owner===pd.owner);return mono&&lvl===0?base*2:base}
+function activeRentPending(){
+  if(S.phase==='rent'&&S.pending&&typeof S.pending.rent==='number')return S.pending;
+  const from=S.cur,pos=S.players[from]?.pos,pd=S.props[pos];
+  if(!pd||pd.owner==null||pd.owner===from||pd.mortgaged)return null;
+  return {pos,doubles:false,rent:rentFor(pos),from,to:pd.owner};
+}
+function setDebt(playerIndex, creditorIndex=null, reason='debt'){
+  S.debt={player:playerIndex,creditor:creditorIndex,reason};
+  S.cur=playerIndex;
+  S.phase='debt';
+  S.pending=null;
+  renderAll();
+  showDebt();
+}
+function payRent(){
+  const q=activeRentPending();
+  if(!q){log('No rent is due right now.');S.phase='done';S.pending=null;renderAll();return}
+  if(S.players[q.from].bankrupt||S.players[q.to].bankrupt){S.pending=null;S.phase='done';renderAll();return}
+  changeMoney(q.from,-q.rent);
+  changeMoney(q.to,q.rent);
+  log(`${S.players[q.from].name} paid £${q.rent} rent to ${S.players[q.to].name}.`);
+  const debtor=q.from,creditor=q.to,doubles=!!q.doubles;
+  S.pending=null;
+  if(S.players[debtor].money<0){setDebt(debtor,creditor,'rent');return}
+  if(doubles){S.phase='ready';S.rolled=false;log(`${S.players[debtor].name} paid rent and keeps the doubles roll.`)}
+  else{S.phase='done';S.rolled=true}
+  renderAll();
+  scheduleSave();
+}
+function payBank(pi,amt){
+  changeMoney(pi,-amt);if(S.options.parking)S.freePot+=amt;
+  log(`${S.players[pi].name} paid £${amt}.`);
+  if(S.players[pi].money<0){setDebt(pi,null,'bank');return}
+  S.phase='done';renderAll();
+}
+function buy(){const q=S.pending;if(!q)return;const sp=SP[q.pos],p=S.players[S.cur];if(p.money<sp.price)return;changeMoney(S.cur,-sp.price);S.props[q.pos].owner=S.cur;log(`${p.name} bought ${sp.n} for £${sp.price}.`);S.phase=q.doubles?'ready':'done';S.rolled=!q.doubles;S.pending=null;renderAll()}
+function passBuy(){const d=S.pending?.doubles;S.pending=null;S.phase=d?'ready':'done';S.rolled=!d;renderAll()}
+function auctionStart(){showAuction(S.pending?.pos)}
+
+const CHANCE_CARDS=[
+  {id:'ch_go',title:'Advance to GO',m:'Advance to GO. Collect £200.',fn:async()=>moveTo(0)},
+  {id:'ch_mayfair',title:'Advance to Mayfair',m:'Advance to Mayfair. Collect £200 if you pass GO.',fn:async()=>moveTo(39)},
+  {id:'ch_trafalgar',title:'Advance to Trafalgar Square',m:'Advance to Trafalgar Square. Collect £200 if you pass GO.',fn:async()=>moveTo(24)},
+  {id:'ch_pallmall',title:'Advance to Pall Mall',m:'Advance to Pall Mall. Collect £200 if you pass GO.',fn:async()=>moveTo(11)},
+  {id:'ch_nearest_station_a',title:'Nearest Station',m:'Advance to the nearest Station. If owned, pay the owner twice the normal rent.',fn:async()=>moveToNearest('st',2)},
+  {id:'ch_nearest_station_b',title:'Nearest Station',m:'Advance to the nearest Station. If owned, pay the owner twice the normal rent.',fn:async()=>moveToNearest('st',2)},
+  {id:'ch_nearest_utility',title:'Nearest Utility',m:'Advance to the nearest Utility. If owned, pay ten times the dice roll.',fn:async()=>moveToNearest('ut',null,10)},
+  {id:'ch_dividend',title:'Bank Dividend',m:'Bank pays you a dividend of £50.',fn:async()=>changeMoney(S.cur,50)},
+  {id:'ch_jail_free',title:'Get Out of Jail Free',m:'Keep this card until needed.',hold:true,fn:async()=>keepJailFree('ch')},
+  {id:'ch_back3',title:'Go Back 3 Spaces',m:'Go back 3 spaces.',fn:async()=>moveRelative(-3)},
+  {id:'ch_jail',title:'Go To Jail',m:'Go directly to Jail. Do not collect £200.',fn:async()=>goJail(S.cur)},
+  {id:'ch_repairs',title:'General Repairs',m:'Pay £25 per house and £100 per hotel.',fn:async()=>payBank(S.cur,buildingCharge(S.cur,25,100))},
+  {id:'ch_speeding',title:'Speeding Fine',m:'Pay £15.',fn:async()=>payBank(S.cur,15)},
+  {id:'ch_chairman',title:'Chairman',m:'You have been elected Chairman. Pay each player £50.',fn:async()=>payEachPlayer(S.cur,50)},
+  {id:'ch_loan',title:'Building Loan',m:'Your building loan matures. Collect £150.',fn:async()=>changeMoney(S.cur,150)},
+  {id:'ch_crossword',title:'Crossword Competition',m:'You have won a crossword competition. Collect £100.',fn:async()=>changeMoney(S.cur,100)}
+];
+const CHEST_CARDS=[
+  {id:'cc_go',title:'Advance to GO',m:'Advance to GO. Collect £200.',fn:async()=>moveTo(0)},
+  {id:'cc_bank_error',title:'Bank Error',m:'Bank error in your favour. Collect £200.',fn:async()=>changeMoney(S.cur,200)},
+  {id:'cc_doctor',title:'Doctor Fee',m:'Doctor fee. Pay £50.',fn:async()=>payBank(S.cur,50)},
+  {id:'cc_stock',title:'Sale of Stock',m:'From sale of stock you get £50.',fn:async()=>changeMoney(S.cur,50)},
+  {id:'cc_jail_free',title:'Get Out of Jail Free',m:'Keep this card until needed.',hold:true,fn:async()=>keepJailFree('cc')},
+  {id:'cc_jail',title:'Go To Jail',m:'Go directly to Jail. Do not collect £200.',fn:async()=>goJail(S.cur)},
+  {id:'cc_holiday',title:'Holiday Fund',m:'Holiday fund matures. Receive £100.',fn:async()=>changeMoney(S.cur,100)},
+  {id:'cc_refund',title:'Tax Refund',m:'Income tax refund. Collect £20.',fn:async()=>changeMoney(S.cur,20)},
+  {id:'cc_birthday',title:'Birthday',m:'It is your birthday. Collect £10 from each player.',fn:async()=>collectFromEachPlayer(S.cur,10)},
+  {id:'cc_life',title:'Life Insurance',m:'Life insurance matures. Collect £100.',fn:async()=>changeMoney(S.cur,100)},
+  {id:'cc_hospital',title:'Hospital Fees',m:'Pay hospital fees of £100.',fn:async()=>payBank(S.cur,100)},
+  {id:'cc_school',title:'School Fees',m:'Pay school fees of £50.',fn:async()=>payBank(S.cur,50)},
+  {id:'cc_consultancy',title:'Consultancy Fee',m:'Receive £25 consultancy fee.',fn:async()=>changeMoney(S.cur,25)},
+  {id:'cc_street_repairs',title:'Street Repairs',m:'Pay £40 per house and £115 per hotel.',fn:async()=>payBank(S.cur,buildingCharge(S.cur,40,115))},
+  {id:'cc_beauty',title:'Beauty Contest',m:'You have won second prize in a beauty contest. Collect £10.',fn:async()=>changeMoney(S.cur,10)},
+  {id:'cc_inherit',title:'Inheritance',m:'You inherit £100.',fn:async()=>changeMoney(S.cur,100)}
+];
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function initDecks(){return{ch:shuffle(CHANCE_CARDS.map(c=>c.id)),cc:shuffle(CHEST_CARDS.map(c=>c.id))}}
+function cardDef(type,id){return (type==='ch'?CHANCE_CARDS:CHEST_CARDS).find(c=>c.id===id)}
+function ensureDeck(type){if(!S.decks)S.decks=initDecks();if(!Array.isArray(S.decks[type])||!S.decks[type].length)S.decks[type]=shuffle((type==='ch'?CHANCE_CARDS:CHEST_CARDS).map(c=>c.id).filter(id=>!heldCardIds().includes(id)))}
+function heldCardIds(){return S.players.flatMap(p=>(p.jailCards||[]).map(t=>t==='ch'?'ch_jail_free':'cc_jail_free'))}
+function keepJailFree(type){const p=S.players[S.cur];p.jailFree=(p.jailFree||0)+1;(p.jailCards||(p.jailCards=[])).push(type);log(`${p.name} kept a Get Out of Jail Free card.`)}
+function returnJailCard(type){ensureDeck(type);S.decks[type].push(type==='ch'?'ch_jail_free':'cc_jail_free')}
+function buildingCharge(pi,houseCost,hotelCost){return owned(pi).reduce((sum,pos)=>{const pd=S.props[pos],sp=SP[pos];if(!pd||sp.t!=='p')return sum;return sum+(pd.houses||0)*houseCost+(pd.hotel?hotelCost:0)},0)}
+function payEachPlayer(from,amount){
+  S.players.forEach((p,i)=>{if(i!==from&&!p.bankrupt){changeMoney(from,-amount);changeMoney(i,amount)}});
+  log(`${S.players[from].name} paid £${amount} to each player.`);
+  if(S.players[from].money<0)setDebt(from,null,'card');
+}
+function collectFromEachPlayer(to,amount){
+  let debtor=null;
+  S.players.forEach((p,i)=>{if(i!==to&&!p.bankrupt){changeMoney(i,-amount);changeMoney(to,amount);if(S.players[i].money<0&&debtor==null)debtor=i}});
+  log(`${S.players[to].name} collected £${amount} from each player.`);
+  if(debtor!=null)setDebt(debtor,to,'card');
+}
+async function moveRelative(delta){await moveSteps(S.cur,Math.abs(delta),delta>0);landOn(false)}
+function nextSpaceOf(type){let p=S.players[S.cur].pos;for(let n=1;n<=40;n++){const pos=(p+n)%40;if(SP[pos].t===type)return pos}return p}
+async function moveToNearest(type,stationMultiplier=1,utilityMultiplier=null){const target=nextSpaceOf(type);await moveTo(target);const pd=S.props[target],sp=SP[target];if(pd&&pd.owner!=null&&pd.owner!==S.cur&&!pd.mortgaged){const rent=utilityMultiplier?((S.dice[0]+S.dice[1])*utilityMultiplier):rentFor(target)*stationMultiplier;S.phase='rent';S.pending={pos:target,doubles:false,rent,from:S.cur,to:pd.owner};renderAll();log(`${S.players[S.cur].name} owes ${S.players[pd.owner].name} £${rent} for ${sp.n}.`)}}
+
+function drawCard(type){ensureDeck(type);const id=S.decks[type].shift(),c=cardDef(type,id);if(!c){log('Deck error. Reshuffling.');S.decks[type]=initDecks()[type];return drawCard(type)}if(!c.hold)S.decks[type].push(id);const title=type==='ch'?'Chance':'Community Chest';modal(`<div class="card-badge">${title}</div><h2>${c.title}</h2><p>${c.m}</p><div class="deck-count">${S.decks[type].length} cards left in deck</div><div class="modal-actions"><button class="primary-btn" onclick="Game.applyCard()">Continue</button></div>`,false);S.pending={cardType:type,cardId:id,cardBusy:false};S.phase='card';scheduleSave()}
+async function applyCard(){
+  if(!S.pending?.cardId||S.pending.cardBusy)return;
+  const cardPending=S.pending,cardType=S.pending.cardType,cardId=S.pending.cardId;
+  S.pending.cardBusy=true;
+  const c=cardDef(cardType,cardId);
+  if(!c){closeModal();log('Card could not be read. Continue play.');S.pending=null;S.phase='done';renderAll();return}
+  try{
+    closeModal();
+    await c.fn();
+    const cardStillPending=S.pending===cardPending||(S.pending&&S.pending.cardId===cardId&&S.pending.cardType===cardType);
+    if(cardStillPending)S.pending=null;
+    if(!['buy','rent','done','debt','handoff','ended'].includes(S.phase))S.phase='done';
+    renderAll();
+    scheduleSave();
+  }catch(e){
+    console.error(e);
+    log('Something went wrong. Try again.');
+    if(S.pending&&S.pending.cardId===cardId)S.pending.cardBusy=false;
+  }
+}
+async function moveTo(to){const p=S.players[S.cur],steps=(to-p.pos+40)%40;await moveSteps(S.cur,steps,true);landOn(false)}
+function goJail(pi){const p=S.players[pi];p.pos=10;p.jail=true;p.jailTurns=0;S.phase='done';S.rolled=true;log(`${p.name} went to Jail.`);renderAll()}
+function showJailOptions(){S.phase='jailChoice';const p=S.players[S.cur];log(`${p.name} is in Jail (${Math.min((p.jailTurns||0)+1,3)}/3). Roll doubles, pay £50, or use a card.`);renderAll()}
+async function rollJailDoubles(){if(S.moving||S.phase!=='jailChoice')return;const p=S.players[S.cur];S.rolled=true;haptic(20);$('diceTray').classList.add('rolling');for(let k=0;k<8;k++){S.dice=[rand(6),rand(6)];renderDice();await wait(k<5?46:62)}S.dice=[rand(6),rand(6)];renderDice();await wait(70);$('diceTray').classList.remove('rolling');const doubles=S.dice[0]===S.dice[1],steps=S.dice[0]+S.dice[1];if(doubles){p.jail=false;p.jailTurns=0;log(`${p.name} rolled doubles and left Jail. Moving ${steps} spaces.`);await moveSteps(S.cur,steps,true);landOn(false);return}p.jailTurns=(p.jailTurns||0)+1;if(p.jailTurns>=3){if(p.money>=50){changeMoney(S.cur,-50);p.jail=false;p.jailTurns=0;log(`${p.name} failed the third Jail roll and paid £50. Moving ${steps} spaces.`);await moveSteps(S.cur,steps,true);landOn(false)}else{changeMoney(S.cur,-50);p.jail=false;p.jailTurns=0;log(`${p.name} failed the third Jail roll and owes £50 bail.`);setDebt(S.cur,null,'jail bail')}}else{log(`${p.name} did not roll doubles and stays in Jail (${p.jailTurns}/3).`);S.phase='done';renderAll()}}
+function payBail(){const p=S.players[S.cur];if(p.money<50)return;changeMoney(S.cur,-50);p.jail=false;p.jailTurns=0;S.phase='ready';S.rolled=false;log(`${p.name} paid £50 bail. Tap dice to roll.`);renderAll()}
+function useJailFree(){const p=S.players[S.cur];if(!p.jailFree)return;p.jailFree--;const deck=(p.jailCards&&p.jailCards.shift())||'cc';returnJailCard(deck);p.jail=false;p.jailTurns=0;S.phase='ready';S.rolled=false;log(`${p.name} used a Jail Free card. Tap dice to roll.`);renderAll();scheduleSave()}
+function endTurn(){S.pending=null;S.rolled=false;const alive=S.players.map((p,i)=>!p.bankrupt?i:null).filter(i=>i!=null);if(alive.length<=1){return checkWinner()}let next=(S.cur+1)%S.players.length;while(S.players[next].bankrupt)next=(next+1)%S.players.length;if(next<=S.cur)S.round++;S.cur=next;S.turn++;S.phase='ready';log(`${S.players[S.cur].name}, your turn.`);renderAll();scheduleSave()}
+function showHandoff(){S.phase='ready';renderAll()}function beginTurn(){closeModal();S.phase='ready';log(`${S.players[S.cur].name}, your turn.`);renderAll()}
+function groupProps(g){return SP.map((s,i)=>s.t==='p'&&s.g===g?i:null).filter(i=>i!=null)}function groupSold(g){return groupProps(g).every(i=>S.props[i].owner!=null)}
+function groupUnlocked(g){const props=groupProps(g);if(S.options.build==='ownedset')return props.every(i=>S.props[i].owner===S.cur);return props.every(i=>S.props[i].owner!=null)}
+function buildGroupOwned(g){return groupProps(g).filter(i=>S.props[i].owner===S.cur&&!S.props[i].mortgaged)}
+function canBuildDetails(i){const sp=SP[i],pd=S.props[i];if(!sp||sp.t!=='p'||pd.owner!==S.cur)return{ok:false,msg:'You do not own this property.'};if(pd.mortgaged)return{ok:false,msg:'Mortgaged properties cannot be improved.'};if(!groupUnlocked(sp.g))return{ok:false,msg:S.options.build==='ownedset'?'Own the full colour set to build.':'Building unlocks when every property in this colour is bought.'};if(pd.hotel)return{ok:false,msg:'This property already has a hotel.'};const mine=buildGroupOwned(sp.g),levels=mine.map(level),min=Math.min(...levels),cur=level(i);if(cur>min)return{ok:false,msg:'Build evenly across your properties in this colour.'};if(cur<4&&housesAvail()<1)return{ok:false,msg:'The bank has no houses left.'};if(cur===4&&hotelsAvail()<1)return{ok:false,msg:'The bank has no hotels left.'};if(S.players[S.cur].money<sp.hc)return{ok:false,msg:'Not enough cash to build.'};return{ok:true,msg:cur===4?'Upgrade to hotel.':'Build one house.'}}
+function canSellDetails(i){const sp=SP[i],pd=S.props[i];if(!sp||sp.t!=='p'||pd.owner!==S.cur)return{ok:false,msg:'You do not own this property.'};const cur=level(i);if(cur<1)return{ok:false,msg:'There is nothing to sell.'};const mine=buildGroupOwned(sp.g),levels=mine.map(level),max=Math.max(...levels);if(cur<max)return{ok:false,msg:'Sell evenly from the most developed property first.'};if(pd.hotel&&housesAvail()<4)return{ok:false,msg:'The bank needs 4 houses available to break a hotel.'};return{ok:true,msg:pd.hotel?'Sell hotel back into 4 houses.':'Sell one house.'}}
+function propertyColour(pos){const sp=SP[pos];return sp.t==='p'?COLORS[sp.g]:sp.t==='st'?COLORS.station:sp.t==='ut'?COLORS.utility:'#777'}
+function rentRows(pos){const sp=SP[pos];if(sp.t==='p'){return sp.r.map((r,i)=>`<div>${i===0?'Site rent':i===5?'Hotel':i+' house'+(i>1?'s':'')}</div><div>£${r}</div>`).join('')}if(sp.t==='st'){return [25,50,100,200].map((r,i)=>`<div>${i+1} station${i?'s':''}</div><div>£${r}</div>`).join('')}if(sp.t==='ut'){return '<div>One utility</div><div>Dice × 4</div><div>Both utilities</div><div>Dice × 10</div>'}return ''}
+function propertyBuyCard(pos){const sp=SP[pos],pd=S.props[pos],owner=pd&&pd.owner!=null?S.players[pd.owner].name:'Unowned';return `<div class="buy-card"><div class="buy-head"><div class="deed-stripe" style="background:${propertyColour(pos)}"></div><div class="buy-title">${sp.n}</div><div class="buy-meta">${owner} · Price £${sp.price||0}</div></div><div class="rent-grid">${rentRows(pos)}</div></div>`}
+function propertyRentCard(q){
+  const sp=SP[q.pos],owner=S.players[q.to]?.name||'Owner',payer=S.players[q.from]?.name||'Player';
+  return `<div class="buy-card"><div class="buy-head"><div class="deed-stripe" style="background:${propertyColour(q.pos)}"></div><div class="buy-title">${sp.n}</div><div class="buy-meta">${payer} owes ${owner}</div></div><div class="rent-grid"><div>Rent due</div><div>£${q.rent}</div>${rentRows(q.pos)}</div></div>`
+}
+function propertyBuildCard(i){const sp=SP[i],pd=S.props[i],build=canBuildDetails(i),sell=canSellDetails(i),status=groupUnlocked(sp.g)?'<span class="status-ok">Unlocked</span>':'<span class="status-warn">Locked</span>';return `<div class="list-row"><div class="deed-stripe" style="background:${propertyColour(i)}"></div><div class="row-title">${sp.n}</div><div class="row-sub">${pd.hotel?'Hotel':pd.houses+' houses'} · Rent £${rentPreview(i)} · Build ${status}</div><div class="build-note">${build.ok?build.msg:build.msg}</div><div class="modal-actions"><button ${build.ok?'':'disabled'} onclick="Game.build(${i})">${pd.houses===4&&!pd.hotel?'Build Hotel':'Build House'}</button><button ${sell.ok?'':'disabled'} onclick="Game.sellBuild(${i})">Sell Building</button></div></div>`}
+
+function showBuild(){const buildables=owned(S.cur).filter(i=>SP[i].t==='p');const rows=buildables.map(propertyBuildCard).join('')||'<p>You do not own any colour properties yet.</p>';modal(`<h2>Manage Buildings</h2><p>Build rule: ${S.options.build==='ownedset'?'own the full colour set':'colour group sold out by any players'}. Houses available: ${housesAvail()} · Hotels available: ${hotelsAvail()}</p><div class="list">${rows}</div><div class="modal-actions"><button class="ghost-btn" onclick="Game.closeModal()">Close</button></div>`,true)}
+function level(i){const pd=S.props[i];return pd.hotel?5:pd.houses}function housesUsed(){return Object.values(S.props).reduce((a,p)=>a+(p.houses||0),0)}function hotelsUsed(){return Object.values(S.props).reduce((a,p)=>a+(p.hotel?1:0),0)}function housesAvail(){return 32-housesUsed()}function hotelsAvail(){return 12-hotelsUsed()}
+function build(i){const sp=SP[i],pd=S.props[i],check=canBuildDetails(i);if(!check.ok){log(check.msg);showBuild();return}if(pd.houses<4){pd.houses++}else{pd.houses=0;pd.hotel=true}changeMoney(S.cur,-sp.hc);log(`${S.players[S.cur].name} built ${pd.hotel?'a hotel':'a house'} on ${sp.n}.`);renderAll();showBuild()}
+function sellBuild(i){const sp=SP[i],pd=S.props[i],check=canSellDetails(i);if(!check.ok){log(check.msg);showBuild();return}if(pd.hotel){pd.hotel=false;pd.houses=4}else{pd.houses--}changeMoney(S.cur,Math.floor(sp.hc/2));log(`${S.players[S.cur].name} sold a building on ${sp.n}.`);renderAll();if(S.phase==='debt'){if(!resolveDebtIfCleared())showDebt()}else showBuild()}
+function showAuction(pos){if(pos==null)return;const sp=SP[pos];modal(`<h2>Auction</h2><p>${sp.n}</p><input id="auctionBid" class="name-input" type="number" value="10" min="10"><div class="modal-actions">${S.players.map((p,i)=>`<button onclick="Game.auctionBid(${pos},${i})">${p.name} Bid</button>`).join('')}<button class="ghost-btn" onclick="Game.closeModal();Game.passBuy()">Cancel</button></div>`,true)}
+function auctionBid(pos,pi){const bid=+$('auctionBid').value||0,sp=SP[pos],p=S.players[pi];if(bid<10||bid>p.money){log('Invalid auction bid.');return}changeMoney(pi,-bid);S.props[pos].owner=pi;log(`${p.name} won ${sp.n} at auction for £${bid}.`);closeModal();S.phase='done';S.pending=null;renderAll()}
+function showTrade(){
+  const rivals=S.players.map((p,i)=>({p,i})).filter(x=>x.i!==S.cur&&!x.p.bankrupt);
+  const buttons=rivals.map(({p,i})=>`<button class="list-row" onclick="Game.openTrade(${i})"><div class="row-title">Trade with ${p.name}</div><div class="row-sub">${owned(i).length} assets available</div></button>`).join('');
+  modal(`<h2>Trade</h2><p>Choose a player, then tap one property from each side to exchange.</p><div class="list">${buttons||'<p>No available players.</p>'}</div><div class="modal-actions"><button class="ghost-btn" onclick="Game.closeModal()">Close</button></div>`,true)
+}
+function showPlayerActions(){
+  const p=S.players[S.cur];
+  modal(`<h2>${p.name} Actions</h2><p>Choose what you want to manage.</p><div class="modal-actions"><button class="primary-btn" onclick="Game.closeModal();Game.showAssets(${S.cur})">Assets</button><button class="ghost-btn" onclick="Game.closeModal();Game.showBuild()">Manage Buildings</button><button class="ghost-btn" onclick="Game.closeModal();Game.showTrade()">Trade</button></div>`,true)
+}
+function openTrade(target){tradeDraft={target,give:null,receive:null};renderTradeModal()}
+function tradeList(owner,side){
+  const items=owned(owner);
+  if(!items.length)return '<div class="list-row"><div class="row-title">No properties</div><div class="row-sub">Nothing to select.</div></div>';
+  return items.map(pos=>{const sp=SP[pos],sel=tradeDraft&&tradeDraft[side]===pos?' selected':'';return `<button class="list-row${sel}" onclick="Game.selectTrade('${side}',${pos})"><div class="row-title">${sp.n}</div><div class="row-sub">Rent ${rentPreview(pos)}</div></button>`}).join('')
+}
+function renderTradeModal(){
+  if(!tradeDraft)return showTrade();
+  const target=tradeDraft.target,me=S.cur,ready=tradeDraft.give!=null&&tradeDraft.receive!=null;
+  modal(`<h2>Trade</h2><p>${S.players[me].name} swaps with ${S.players[target].name}</p><div class="trade-grid"><div><h3>${S.players[me].name} gives</h3><div class="list">${tradeList(me,'give')}</div></div><div><h3>${S.players[target].name} gives</h3><div class="list">${tradeList(target,'receive')}</div></div></div><div class="modal-actions"><button class="primary-btn" ${ready?'':'disabled'} onclick="Game.executeTrade()">Exchange Selected</button><button class="ghost-btn" onclick="Game.showTrade()">Choose Different Player</button><button class="ghost-btn" onclick="Game.closeModal()">Close</button></div>`,true)
+}
+function selectTrade(side,pos){if(!tradeDraft)return;tradeDraft[side]=pos;renderTradeModal()}
+function executeTrade(){
+  if(!tradeDraft)return;const {target,give,receive}=tradeDraft;
+  if(S.props[give]?.owner!==S.cur||S.props[receive]?.owner!==target){log('Trade could not be completed because ownership changed.');tradeDraft=null;closeModal();renderAll();return}
+  S.props[give].owner=target;S.props[receive].owner=S.cur;
+  log(`${S.players[S.cur].name} traded ${SP[give].n} for ${SP[receive].n} with ${S.players[target].name}.`);
+  tradeDraft=null;closeModal();renderAll();scheduleSave()
+}
+function assetManageRow(pos,viewer){
+  const sp=SP[pos],pd=S.props[pos],isOwner=pd&&pd.owner===viewer&&!S.players[viewer].bankrupt;
+  const rent=rentPreview(pos),mort=pd&&pd.mortgaged;
+  let actions=`<button class="ghost-btn" onclick="Game.showDeed(${pos})">View Deed</button>`;
+  if(isOwner&&S.phase!=='debt'){
+    if(mort){
+      const check=canUnmortgageProperty(pos,viewer);
+      actions+=`<button ${check.ok?'':'disabled'} class="primary-btn" onclick="Game.unmortgageProperty(${pos},${viewer})">Unmortgage £${unmortgageCost(pos)}</button>`;
+    }else{
+      const check=canMortgageProperty(pos,viewer);
+      actions+=`<button ${check.ok?'':'disabled'} class="ghost-btn" onclick="Game.mortgageProperty(${pos},${viewer})">Mortgage £${mortgageValue(pos)}</button>`;
+    }
+  }
+  return `<div class="list-row"><div class="row-title">${sp.n}${mort?' · MORTGAGED':''}</div><div class="row-sub">${mort?'No rent while mortgaged':`Rent £${rent}`} · Value £${sp.price||0}</div><div class="modal-actions">${actions}</div></div>`;
+}
+function showAssets(i){const rows=owned(i).map(pos=>assetManageRow(pos,i)).join('')||'<p>No properties yet.</p>';modal(`<h2>${S.players[i].name} Assets</h2><div class="list">${rows}</div><div class="modal-actions"><button class="ghost-btn" onclick="Game.closeModal()">Close</button></div>`,true)}function rentPreview(pos){const sp=SP[pos],pd=S.props[pos];if(sp.t==='p')return sp.r[pd.hotel?5:pd.houses];if(sp.t==='st')return 25;if(sp.t==='ut')return 'dice × 4';return 0}
+function deedActions(pos){
+  const pd=S.props[pos];
+  if(!pd||pd.owner!==S.cur||S.phase==='debt')return '';
+  if(pd.mortgaged){
+    const check=canUnmortgageProperty(pos,S.cur);
+    return `<button ${check.ok?'':'disabled'} class="primary-btn" onclick="Game.unmortgageProperty(${pos},${S.cur})">Unmortgage £${unmortgageCost(pos)}</button>`;
+  }
+  const check=canMortgageProperty(pos,S.cur);
+  return `<button ${check.ok?'':'disabled'} class="ghost-btn" onclick="Game.mortgageProperty(${pos},${S.cur})">Mortgage £${mortgageValue(pos)}</button>`;
+}
+function showDeed(pos){const sp=SP[pos],pd=S.props[pos];if(!sp)return;const owner=pd?`Owner: ${pd.owner==null?'Unowned':S.players[pd.owner].name}`:'Board space';const price=sp.price?` · Price £${sp.price}`:'';const mortgage=pd&&pd.mortgaged?`<p class="status-warn">Mortgaged · no rent is collected until unmortgaged.</p>`:'';modal(`<h2>${sp.n}</h2><div class="deed-stripe" style="background:${propertyColour(pos)}"></div><p>${owner}${price}</p>${mortgage}<div class="rent-grid">${rentRows(pos)}</div><div class="modal-actions">${deedActions(pos)}<button class="ghost-btn" onclick="Game.closeModal()">Close</button></div>`,true)}
+function historyMarkup(){
+  if(!S.history.length)return '<p>No history yet.</p>';
+  let last=null,out='';
+  S.history.slice().reverse().forEach(h=>{
+    const r=h.r||1;
+    if(r!==last){last=r;out+=`<div class="history-round">ROUND ${r}</div>`}
+    out+=`<div class="list-row"><div class="row-sub">Turn ${h.turn||''} · ${h.t||''}</div><div class="row-title">${h.m}</div></div>`;
+  });
+  return out;
+}
+function showHistory(){modal(`<h2>History</h2><p>Round ${S.round} · Turn ${S.turn}</p><div class="list">${historyMarkup()}</div><div class="modal-actions"><button class="ghost-btn" onclick="Game.closeModal()">Close</button></div>`,true)}
+function showRules(){modal('<h2>Rules</h2><p>Colour groups unlock for building when every property in that colour has been bought. Build only on property you own. Houses and hotels must be built and sold evenly across your owned properties in that colour. House supply is limited to 32 houses and 12 hotels.</p><div class="modal-actions"><button class="ghost-btn" onclick="Game.closeModal()">Close</button></div>',true)}
+function debtPlayer(){return S.debt&&typeof S.debt.player==='number'?S.debt.player:S.cur}
+function debtCreditor(){return S.debt&&typeof S.debt.creditor==='number'?S.debt.creditor:null}
+function canSellDebtBuilding(i,owner){
+  const sp=SP[i],pd=S.props[i];
+  if(!sp||sp.t!=='p'||!pd||pd.owner!==owner)return{ok:false,msg:'Not owned by debtor.'};
+  const cur=level(i);if(cur<1)return{ok:false,msg:'No building to sell.'};
+  const mine=groupProps(sp.g).filter(pos=>S.props[pos].owner===owner&&!S.props[pos].mortgaged);
+  const levels=mine.map(level),max=Math.max(...levels);
+  if(cur<max)return{ok:false,msg:'Sell evenly from the most developed property first.'};
+  if(pd.hotel&&housesAvail()<4)return{ok:false,msg:'Bank needs 4 houses available to break this hotel.'};
+  return{ok:true,msg:pd.hotel?'Sell hotel into 4 houses.':'Sell one house.'};
+}
+function canMortgageProperty(pos,owner){
+  const sp=SP[pos],pd=S.props[pos];
+  if(!sp||!pd||pd.owner!==owner)return{ok:false,msg:'Not owned by debtor.'};
+  if(pd.mortgaged)return{ok:false,msg:'Already mortgaged.'};
+  if(sp.t==='p'){
+    const hasBuildings=groupProps(sp.g).some(i=>{const d=S.props[i];return d&&d.owner===owner&&(d.houses>0||d.hotel)});
+    if(hasBuildings)return{ok:false,msg:'Sell buildings in this colour before mortgaging.'};
+  }
+  return{ok:true,msg:`Mortgage for £${Math.floor(sp.price/2)}.`};
+}
+function mortgageValue(pos){const sp=SP[pos];return Math.floor((sp&&sp.price?sp.price:0)/2)}
+function unmortgageCost(pos){return Math.ceil(mortgageValue(pos)*1.1)}
+function canUnmortgageProperty(pos,owner){
+  const sp=SP[pos],pd=S.props[pos];
+  if(!sp||!pd||pd.owner!==owner)return{ok:false,msg:'Not owned by this player.'};
+  if(!pd.mortgaged)return{ok:false,msg:'Not mortgaged.'};
+  const cost=unmortgageCost(pos);
+  if(S.players[owner].money<cost)return{ok:false,msg:`Need £${cost} to unmortgage.`};
+  return{ok:true,msg:`Unmortgage for £${cost}.`};
+}
+function mortgageProperty(pos,owner=S.cur){
+  if(S.phase==='debt')return mortgageDebtProperty(pos);
+  const sp=SP[pos],pd=S.props[pos],check=canMortgageProperty(pos,owner);
+  if(!check.ok){log(check.msg);showAssets(owner);return}
+  pd.mortgaged=true;
+  changeMoney(owner,mortgageValue(pos));
+  log(`${S.players[owner].name} mortgaged ${sp.n} for £${mortgageValue(pos)}.`);
+  renderAll();showAssets(owner);scheduleSave();
+}
+function unmortgageProperty(pos,owner=S.cur){
+  if(S.phase==='debt'){log('Resolve debt before unmortgaging.');showDebt();return}
+  const sp=SP[pos],pd=S.props[pos],check=canUnmortgageProperty(pos,owner);
+  if(!check.ok){log(check.msg);showAssets(owner);return}
+  const cost=unmortgageCost(pos);
+  pd.mortgaged=false;
+  changeMoney(owner,-cost);
+  log(`${S.players[owner].name} unmortgaged ${sp.n} for £${cost}.`);
+  renderAll();showAssets(owner);scheduleSave();
+}
+function debtBuildingRows(owner=debtPlayer()){
+  const rows=owned(owner).filter(i=>SP[i].t==='p'&&level(i)>0).map(i=>{
+    const sp=SP[i],pd=S.props[i],sell=canSellDebtBuilding(i,owner);
+    return `<button class="list-row" ${sell.ok?'':'disabled'} onclick="Game.sellDebtBuilding(${i})"><div class="row-title">Sell building · ${sp.n}</div><div class="row-sub">${pd.hotel?'Hotel':pd.houses+' house'+(pd.houses>1?'s':'')} · Receive £${Math.floor(sp.hc/2)} · ${sell.msg}</div></button>`;
+  }).join('');
+  return rows||'<div class="list-row"><div class="row-title">No buildings to sell</div><div class="row-sub">No houses or hotels are available to sell.</div></div>';
+}
+function debtMortgageRows(owner=debtPlayer()){
+  const rows=owned(owner).map(pos=>{
+    const sp=SP[pos],check=canMortgageProperty(pos,owner),value=mortgageValue(pos);
+    const sub=S.props[pos].mortgaged?`Already mortgaged · Unmortgage later for £${unmortgageCost(pos)}`:`Receive £${value} · ${check.msg}`;
+    return `<button class="list-row" ${check.ok?'':'disabled'} onclick="Game.mortgageDebtProperty(${pos})"><div class="row-title">Mortgage · ${sp.n}</div><div class="row-sub">${sub}</div></button>`;
+  }).join('');
+  return rows||'<div class="list-row"><div class="row-title">No properties to mortgage</div><div class="row-sub">There are no assets left to raise money from.</div></div>';
+}
+function showDebt(){
+  const owner=debtPlayer(),p=S.players[owner];
+  if(!p||p.bankrupt)return;
+  const creditor=debtCreditor();
+  const owedTo=creditor!=null?`Owed to ${S.players[creditor].name}`:'Owed to the bank';
+  modal(`<h2>Resolve Debt</h2><p>${p.name} is below £0. ${owedTo}.</p><div class="debt-total">£${p.money.toLocaleString()}</div><p>Sell buildings first, then mortgage properties. Mortgaged assets can be unmortgaged after debt is cleared. If you cannot recover, declare bankruptcy.</p><div class="history-round">SELL BUILDINGS</div><div class="debt-actions">${debtBuildingRows(owner)}</div><div class="history-round">MORTGAGE PROPERTIES</div><div class="debt-actions">${debtMortgageRows(owner)}</div><div class="modal-actions"><button class="primary-btn" onclick="Game.declareBankruptcy(${owner})">Declare Bankruptcy</button></div>`,false);
+}
+function resolveDebtIfCleared(){
+  const owner=debtPlayer();
+  if(S.players[owner]&&S.players[owner].money>=0){
+    closeModal();S.phase='done';S.debt=null;S.pending=null;S.cur=owner;
+    log(`${S.players[owner].name} resolved their debt.`);renderAll();scheduleSave();return true;
+  }
+  return false;
+}
+function sellDebtBuilding(i){
+  if(S.phase!=='debt')return;
+  const owner=debtPlayer(),sp=SP[i],pd=S.props[i],check=canSellDebtBuilding(i,owner);
+  if(!check.ok){log(check.msg);showDebt();return}
+  if(pd.hotel){pd.hotel=false;pd.houses=4}else{pd.houses--}
+  changeMoney(owner,Math.floor(sp.hc/2));
+  log(`${S.players[owner].name} sold a building on ${sp.n}.`);
+  renderAll();if(!resolveDebtIfCleared())showDebt();
+}
+function mortgageDebtProperty(pos){
+  if(S.phase!=='debt')return;
+  const owner=debtPlayer(),sp=SP[pos],pd=S.props[pos],check=canMortgageProperty(pos,owner);
+  if(!check.ok){log(check.msg);showDebt();return}
+  pd.mortgaged=true;changeMoney(owner,mortgageValue(pos));
+  log(`${S.players[owner].name} mortgaged ${sp.n} for £${mortgageValue(pos)}.`);
+  renderAll();if(!resolveDebtIfCleared())showDebt();
+}
+function activePlayers(){return S.players.map((p,i)=>!p.bankrupt?i:null).filter(i=>i!=null)}
+function checkWinner(){const alive=activePlayers();if(alive.length===1){const w=alive[0];S.cur=w;S.phase='ended';S.debt=null;S.pending=null;closeModal();renderAll();showWinner(w);scheduleSave();return true}return false}
+function showWinner(i){const p=S.players[i];celebrate();modal(`<div class="winner-box"><div class="winner-crown">♛</div><div class="winner-name">${p.name} Wins</div><p>Cash £${p.money.toLocaleString()} · Net worth £${netWorth(i).toLocaleString()} · ${owned(i).length} assets</p><p>Finished in Round ${S.round}, Turn ${S.turn}.</p><div class="modal-actions"><button class="primary-btn" onclick="Game.resetToSetup()">New Game</button></div></div>`,false)}
+function celebrate(){for(let i=0;i<36;i++){const d=document.createElement('div');d.className='celebration-dot';d.style.left='50vw';d.style.top='42vh';d.style.background=[PCOL[0],PCOL[1],PCOL[2],'#d5b653','#39d773'][i%5];d.style.setProperty('--dx',((Math.random()*2-1)*420)+'px');d.style.setProperty('--dy',((Math.random()*2-1)*280)+'px');document.body.appendChild(d);setTimeout(()=>d.remove(),950)}}
+function transferOrReleaseAssets(from,creditor){
+  owned(from).forEach(pos=>{
+    const pd=S.props[pos];
+    pd.houses=0;pd.hotel=false;
+    if(creditor!=null&&!S.players[creditor].bankrupt){pd.owner=creditor}else{pd.owner=null;pd.mortgaged=false}
+  });
+}
+function declareBankruptcy(i){
+  const p=S.players[i];if(!p||p.bankrupt)return;
+  const creditor=debtCreditor();
+  closeModal();
+  transferOrReleaseAssets(i,creditor);
+  p.bankrupt=true;p.money=0;p.jail=false;p.jailTurns=0;S.debt=null;S.pending=null;
+  log(`${p.name} declared bankruptcy${creditor!=null?` to ${S.players[creditor].name}`:''}.`);
+  renderAll();
+  if(checkWinner())return;
+  if(S.cur===i){
+    let next=(i+1)%S.players.length;while(S.players[next].bankrupt)next=(next+1)%S.players.length;
+    if(next<=i)S.round++;S.cur=next;S.turn++;S.rolled=false;S.phase='ready';
+    log(`${S.players[S.cur].name}, your turn.`);
+  }else{S.phase='ready'}
+  renderAll();scheduleSave();
+}
+
+
+/* OG RULE FIXES: auction, debt, bankruptcy, mortgage transfer, rent accounting, clearer building/rent UI */
+function activeBidders(){return S.players.map((p,i)=>!p.bankrupt?i:null).filter(i=>i!=null)}
+function auctionStart(){
+  const pos=S.pending&&typeof S.pending.pos==='number'?S.pending.pos:null;
+  if(pos==null){log('No property is available for auction.');return}
+  S.auction={pos,doubles:!!S.pending.doubles,currentBid:0,highBidder:null,turns:activeBidders(),passed:{},active:0};
+  S.pending=null;S.phase='auction';renderAll();renderAuctionModal();scheduleSave();
+}
+function nextAuctionIndex(){
+  const a=S.auction;if(!a)return -1;
+  const turns=a.turns.filter(i=>!S.players[i].bankrupt&&!a.passed[i]);
+  if(!turns.length)return -1;
+  let guard=0;
+  while(guard++<20){
+    a.active=(a.active||0)%a.turns.length;
+    const pi=a.turns[a.active];
+    if(turns.includes(pi))return a.active;
+    a.active=(a.active+1)%a.turns.length;
+  }
+  return -1;
+}
+function auctionLiveCount(){const a=S.auction;if(!a)return 0;return a.turns.filter(i=>!S.players[i].bankrupt&&!a.passed[i]).length}
+function renderAuctionModal(){
+  const a=S.auction;if(!a)return;
+  const sp=SP[a.pos];
+  const idx=nextAuctionIndex();
+  const current=idx>=0?a.turns[idx]:null;
+  const high=a.highBidder==null?'None':S.players[a.highBidder].name;
+  const min=a.currentBid+1;
+  const bidder=current!=null?S.players[current]:null;
+  const rows=a.turns.map(i=>`<div class="list-row"><div class="row-title">${S.players[i].name}${a.highBidder===i?' · highest':''}</div><div class="row-sub">${a.passed[i]?'Passed':`Cash £${S.players[i].money}`}</div></div>`).join('');
+  modal(`<h2>Auction · ${sp.n}</h2><p>Highest bid: <strong>£${a.currentBid}</strong> by ${high}. ${bidder?`Current bidder: <strong>${bidder.name}</strong>.`:''}</p><div class="list">${rows}</div>${bidder?`<input id="auctionBid" class="name-input" type="number" value="${Math.min(Math.max(min,10),Math.max(min,bidder.money))}" min="${min}" max="${bidder.money}"><div class="modal-actions"><button class="primary-btn" onclick="Game.auctionBid()">Bid</button><button class="ghost-btn" onclick="Game.auctionPass()">Pass</button></div>`:''}`,false);
+}
+function auctionBid(){
+  const a=S.auction;if(!a)return;
+  const idx=nextAuctionIndex();if(idx<0)return finishAuction();
+  const pi=a.turns[idx],p=S.players[pi];
+  const bid=+$('auctionBid').value||0;
+  if(bid<=a.currentBid){log('Auction bid must be higher than the current bid.');renderAuctionModal();return}
+  if(bid>p.money){log(`${p.name} cannot bid more cash than they have.`);renderAuctionModal();return}
+  a.currentBid=bid;a.highBidder=pi;a.active=(idx+1)%a.turns.length;
+  log(`${p.name} bid £${bid} for ${SP[a.pos].n}.`);
+  if(auctionLiveCount()<=1&&a.highBidder!=null)return finishAuction();
+  renderAuctionModal();scheduleSave();
+}
+function auctionPass(){
+  const a=S.auction;if(!a)return;
+  const idx=nextAuctionIndex();if(idx<0)return finishAuction();
+  const pi=a.turns[idx];a.passed[pi]=true;a.active=(idx+1)%a.turns.length;
+  log(`${S.players[pi].name} passed in the auction.`);
+  if(auctionLiveCount()<=1)return finishAuction();
+  renderAuctionModal();scheduleSave();
+}
+function finishAuction(){
+  const a=S.auction;if(!a)return;
+  const sp=SP[a.pos];
+  closeModal();
+  if(a.highBidder!=null&&a.currentBid>0){
+    changeMoney(a.highBidder,-a.currentBid);S.props[a.pos].owner=a.highBidder;
+    log(`${S.players[a.highBidder].name} won ${sp.n} for £${a.currentBid}.`);
+    if(S.players[a.highBidder].money<0){setDebt(a.highBidder,null,'auction',a.currentBid);S.auction=null;return}
+  }else log(`${sp.n} received no bids and remains unowned.`);
+  const doubles=!!a.doubles;S.auction=null;S.phase=doubles?'ready':'done';S.rolled=!doubles;renderAll();scheduleSave();
+}
+function showAuction(pos){S.pending={pos,doubles:!!(S.pending&&S.pending.doubles)};auctionStart()}
+function auctionBidLegacy(pos,pi){auctionBid()}
+function auctionBidCompat(pos,pi){auctionBid()}
+
+function paymentDebtAmount(fallback=0){return S.debt&&typeof S.debt.amount==='number'?S.debt.amount:fallback}
+function setDebt(playerIndex, creditorIndex=null, reason='debt', amount=0){
+  S.debt={player:playerIndex,creditor:creditorIndex,reason,amount:amount||0};
+  S.cur=playerIndex;S.phase='debt';S.pending=null;S.auction=null;renderAll();showDebt();
+}
+function payRent(){
+  const q=activeRentPending();
+  if(!q){log('No rent is due right now.');S.phase='done';S.pending=null;renderAll();return}
+  if(S.players[q.from].bankrupt||S.players[q.to].bankrupt){S.pending=null;S.phase='done';renderAll();return}
+  const payer=S.players[q.from],owner=S.players[q.to];
+  if(payer.money>=q.rent){
+    changeMoney(q.from,-q.rent);changeMoney(q.to,q.rent);
+    log(`${payer.name} paid £${q.rent} rent to ${owner.name}.`);
+    const doubles=!!q.doubles;S.pending=null;
+    if(doubles){S.phase='ready';S.rolled=false;log(`${payer.name} paid rent and keeps the doubles roll.`)}else{S.phase='done';S.rolled=true}
+    renderAll();scheduleSave();return;
+  }
+  changeMoney(q.from,-q.rent);
+  log(`${payer.name} owes ${owner.name} £${q.rent} rent and must resolve debt.`);
+  setDebt(q.from,q.to,'rent',q.rent);
+}
+function payBank(pi,amt){
+  changeMoney(pi,-amt);
+  log(`${S.players[pi].name} paid £${amt}.`);
+  if(S.players[pi].money<0){setDebt(pi,null,'bank',amt);return}
+  S.phase='done';renderAll();
+}
+function resolveDebtIfCleared(){
+  const owner=debtPlayer(),d=S.debt;
+  if(S.players[owner]&&S.players[owner].money>=0){
+    if(d&&d.creditor!=null&&!S.players[d.creditor].bankrupt&&d.amount>0){
+      changeMoney(d.creditor,d.amount);
+      log(`${S.players[d.creditor].name} received £${d.amount} owed by ${S.players[owner].name}.`);
+    }
+    closeModal();S.phase='done';S.debt=null;S.pending=null;S.cur=owner;
+    log(`${S.players[owner].name} resolved their debt.`);renderAll();scheduleSave();return true;
+  }
+  return false;
+}
+function recoverableCash(owner=debtPlayer()){
+  let v=S.players[owner]?S.players[owner].money:0;
+  owned(owner).forEach(pos=>{const sp=SP[pos],pd=S.props[pos];if(!sp||!pd)return;if(sp.t==='p'){v+=(pd.houses||0)*Math.floor(sp.hc/2);if(pd.hotel)v+=Math.floor(sp.hc/2)}if(!pd.mortgaged)v+=mortgageValue(pos)});
+  return v;
+}
+function debtSummary(owner=debtPlayer()){
+  const p=S.players[owner],recover=recoverableCash(owner),short=Math.max(0,-p.money);
+  const possible=recover>=0;
+  return `<div class="debt-total">Balance £${p.money.toLocaleString()}</div><p><strong>Shortfall:</strong> £${short.toLocaleString()} · <strong>Recoverable after selling/mortgaging:</strong> £${Math.max(0,recover).toLocaleString()} ${possible?'<span class="status-ok">Can recover</span>':'<span class="status-warn">Cannot fully recover</span>'}</p>`;
+}
+function showDebt(){
+  const owner=debtPlayer(),p=S.players[owner];if(!p||p.bankrupt)return;
+  const creditor=debtCreditor();
+  const owedTo=creditor!=null?`Owed to ${S.players[creditor].name}`:'Owed to the bank';
+  modal(`<h2>Resolve Debt</h2><p>${p.name} is below £0. ${owedTo}. Play cannot continue until this is resolved.</p>${debtSummary(owner)}<p>Sell houses/hotels first, then mortgage properties. If the balance cannot return to £0 or above, declare bankruptcy.</p><div class="history-round">SELL BUILDINGS</div><div class="debt-actions">${debtBuildingRows(owner)}</div><div class="history-round">MORTGAGE PROPERTIES</div><div class="debt-actions">${debtMortgageRows(owner)}</div><div class="modal-actions"><button class="primary-btn" onclick="Game.declareBankruptcy(${owner})">Declare Bankruptcy</button></div>`,false);
+}
+function sellAllBuildingsForBankruptcy(owner){
+  let total=0;
+  owned(owner).forEach(pos=>{const sp=SP[pos],pd=S.props[pos];if(!sp||sp.t!=='p'||!pd)return;total+=(pd.houses||0)*Math.floor(sp.hc/2);if(pd.hotel)total+=Math.floor(sp.hc/2);pd.houses=0;pd.hotel=false;});
+  if(total>0){S.players[owner].money+=total;log(`${S.players[owner].name}'s buildings were sold back to the bank for £${total}.`)}
+  return total;
+}
+function mortgageTransferInterestTotal(owner){return owned(owner).reduce((sum,pos)=>sum+(S.props[pos].mortgaged?Math.ceil(mortgageValue(pos)*0.1):0),0)}
+function chargeMortgageTransferInterest(owner){
+  const total=mortgageTransferInterestTotal(owner);
+  if(total>0){changeMoney(owner,-total);log(`${S.players[owner].name} paid £${total} mortgage interest to the bank for transferred mortgaged properties.`)}
+  return total;
+}
+function transferOrReleaseAssets(from,creditor){
+  if(creditor!=null&&!S.players[creditor].bankrupt){
+    owned(from).forEach(pos=>{S.props[pos].owner=creditor;});
+  }else{
+    owned(from).forEach(pos=>{const pd=S.props[pos];pd.owner=null;pd.houses=0;pd.hotel=false;pd.mortgaged=false;});
+  }
+}
+function declareBankruptcy(i){
+  const p=S.players[i];if(!p||p.bankrupt)return;
+  const d=S.debt,creditor=debtCreditor();
+  closeModal();
+  sellAllBuildingsForBankruptcy(i);
+  if(creditor!=null&&!S.players[creditor].bankrupt){
+    const cash=Math.max(0,p.money+(d&&d.amount?d.amount:0));
+    if(cash>0){changeMoney(creditor,cash);log(`${S.players[creditor].name} received £${cash} remaining cash from ${p.name}.`)}
+    transferOrReleaseAssets(i,creditor);
+    chargeMortgageTransferInterest(creditor);
+  }else{
+    transferOrReleaseAssets(i,null);
+    log(`${p.name}'s properties returned to the bank.`);
+  }
+  p.bankrupt=true;p.money=0;p.jail=false;p.jailTurns=0;p.jailFree=0;p.jailCards=[];S.debt=null;S.pending=null;S.auction=null;
+  log(`${p.name} declared bankruptcy${creditor!=null?` to ${S.players[creditor].name}`:' to the bank'}.`);
+  renderAll();
+  if(creditor!=null&&!S.players[creditor].bankrupt&&S.players[creditor].money<0){setDebt(creditor,null,'mortgage interest',0);return}
+  if(checkWinner())return;
+  let next=(i+1)%S.players.length;while(S.players[next].bankrupt)next=(next+1)%S.players.length;
+  if(next<=i)S.round++;S.cur=next;S.turn++;S.rolled=false;S.phase='ready';
+  log(`${S.players[S.cur].name}, your turn.`);renderAll();scheduleSave();
+}
+function rentPreview(pos){const sp=SP[pos],pd=S.props[pos];if(!sp)return 0;if(sp.t==='p')return sp.r[pd&&pd.hotel?5:(pd?pd.houses:0)];if(sp.t==='st'){const owner=pd?pd.owner:null;const n=owner==null?1:owned(owner).filter(k=>SP[k].t==='st').length;return [25,50,100,200][n-1]||25}if(sp.t==='ut')return `dice × ${pd&&pd.owner!=null&&owned(pd.owner).filter(k=>SP[k].t==='ut').length>1?10:4}`;return 0}
+function rentNote(pos,actual=null){const sp=SP[pos],pd=S.props[pos];if(!sp||!pd)return '';if(sp.t==='st'){const n=owned(pd.owner).filter(k=>SP[k].t==='st').length;return `${n} station${n>1?'s':''} owned.`}if(sp.t==='ut'){const n=owned(pd.owner).filter(k=>SP[k].t==='ut').length,m=n>1?10:4,roll=S.dice[0]+S.dice[1];return `Dice ${roll} × ${m}${actual!=null?` = £${actual}`:''}.`}return pd.mortgaged?'Mortgaged: no rent.':''}
+function propertyRentCard(q){const sp=SP[q.pos],owner=S.players[q.to]?.name||'Owner',payer=S.players[q.from]?.name||'Player';return `<div class="buy-card"><div class="buy-head"><div class="deed-stripe" style="background:${propertyColour(q.pos)}"></div><div class="buy-title">${sp.n}</div><div class="buy-meta">${payer} owes ${owner}</div></div><div class="rent-grid"><div>Rent due</div><div>£${q.rent}</div>${rentRows(q.pos)}</div><p class="row-sub">${rentNote(q.pos,q.rent)}</p></div>`}
+function groupProgress(g){const gp=groupProps(g),bought=gp.filter(i=>S.props[i].owner!=null).length;return `${bought}/${gp.length} bought`}
+function propertyBuildCard(i){const sp=SP[i],pd=S.props[i],build=canBuildDetails(i),sell=canSellDetails(i),unlocked=groupUnlocked(sp.g),status=unlocked?'<span class="status-ok">Unlocked</span>':`<span class="status-warn">Locked · ${groupProgress(sp.g)}</span>`;return `<div class="list-row"><div class="deed-stripe" style="background:${propertyColour(i)}"></div><div class="row-title">${sp.n}</div><div class="row-sub">${pd.hotel?'Hotel':pd.houses+' houses'} · Rent £${rentPreview(i)} · Build ${status}</div><div class="build-note">${build.msg}</div><div class="modal-actions"><button ${build.ok?'':'disabled'} onclick="Game.build(${i})">${pd.houses===4&&!pd.hotel?'Build Hotel':'Build House'}</button><button ${sell.ok?'':'disabled'} onclick="Game.sellBuild(${i})">Sell Building</button></div></div>`}
+function assetManageRow(pos,viewer){
+  const sp=SP[pos],pd=S.props[pos],isOwner=pd&&pd.owner===viewer&&!S.players[viewer].bankrupt;const mort=pd&&pd.mortgaged;
+  const mortBadge=mort?' · MORTGAGED':'';
+  let actions=`<button class="ghost-btn" onclick="Game.showDeed(${pos})">View Deed</button>`;
+  if(isOwner&&S.phase!=='debt'){
+    if(mort){const check=canUnmortgageProperty(pos,viewer);actions+=`<button ${check.ok?'':'disabled'} class="primary-btn" onclick="Game.unmortgageProperty(${pos},${viewer})">Unmortgage £${unmortgageCost(pos)}</button>`}
+    else{const check=canMortgageProperty(pos,viewer);actions+=`<button ${check.ok?'':'disabled'} class="ghost-btn" onclick="Game.mortgageProperty(${pos},${viewer})">Mortgage £${mortgageValue(pos)}</button>`}
+  }
+  return `<div class="list-row"><div class="row-title">${sp.n}${mortBadge}</div><div class="row-sub">${mort?'No rent while mortgaged':`Rent ${rentPreview(pos)}`} · ${rentNote(pos)} · Value £${sp.price||0}</div><div class="modal-actions">${actions}</div></div>`;
+}
+function canTradeProperty(pos,owner){
+  if(pos==null)return{ok:true,msg:'No property selected.'};
+  const sp=SP[pos],pd=S.props[pos];if(!sp||!pd||pd.owner!==owner)return{ok:false,msg:'Not owned.'};
+  if(sp.t==='p'&&groupProps(sp.g).some(i=>{const d=S.props[i];return d&&d.owner===owner&&((d.houses||0)>0||d.hotel)}))return{ok:false,msg:'Sell buildings in this colour before trading.'};
+  return{ok:true,msg:pd.mortgaged?'Mortgaged property: recipient pays 10% interest.':'Tradable.'};
+}
+function tradeList(owner,side){
+  const items=owned(owner);let out=`<button class="list-row${tradeDraft&&tradeDraft[side]==null?' selected':''}" onclick="Game.selectTrade('${side}',null)"><div class="row-title">No property</div><div class="row-sub">Cash-only side.</div></button>`;
+  out+=items.map(pos=>{const sp=SP[pos],sel=tradeDraft&&tradeDraft[side]===pos?' selected':'',check=canTradeProperty(pos,owner);return `<button class="list-row${sel}" ${check.ok?'':'disabled'} onclick="Game.selectTrade('${side}',${pos})"><div class="row-title">${sp.n}${S.props[pos].mortgaged?' · MORTGAGED':''}</div><div class="row-sub">${check.msg}</div></button>`}).join('');
+  return out;
+}
+function renderTradeModal(){
+  if(!tradeDraft)return showTrade();
+  const target=tradeDraft.target,me=S.cur;
+  modal(`<h2>Trade</h2><p>${S.players[me].name} trades with ${S.players[target].name}. Cash and mortgaged property transfers follow OG mortgage-interest rules.</p><div class="trade-grid"><div><h3>${S.players[me].name} gives</h3><div class="list">${tradeList(me,'give')}</div><label class="label">Cash</label><input id="cashGive" class="name-input" type="number" min="0" value="${tradeDraft.cashGive||0}"></div><div><h3>${S.players[target].name} gives</h3><div class="list">${tradeList(target,'receive')}</div><label class="label">Cash</label><input id="cashReceive" class="name-input" type="number" min="0" value="${tradeDraft.cashReceive||0}"></div></div><div class="modal-actions"><button class="primary-btn" onclick="Game.executeTrade()">Complete Trade</button><button class="ghost-btn" onclick="Game.showTrade()">Choose Different Player</button><button class="ghost-btn" onclick="Game.closeModal()">Close</button></div>`,true)
+}
+function selectTrade(side,pos){if(!tradeDraft)return;tradeDraft[side]=pos;renderTradeModal()}
+function executeTrade(){
+  if(!tradeDraft)return;const target=tradeDraft.target,me=S.cur,give=tradeDraft.give,receive=tradeDraft.receive;
+  const cashGive=Math.max(0,+($('cashGive')?.value||0)),cashReceive=Math.max(0,+($('cashReceive')?.value||0));
+  const cg=canTradeProperty(give,me),cr=canTradeProperty(receive,target);
+  if(!cg.ok||!cr.ok){log('Trade blocked: sell buildings before trading that colour.');renderTradeModal();return}
+  if(cashGive>S.players[me].money||cashReceive>S.players[target].money){log('Trade blocked: one player does not have enough cash.');renderTradeModal();return}
+  if(give!=null)S.props[give].owner=target;if(receive!=null)S.props[receive].owner=me;
+  if(cashGive){changeMoney(me,-cashGive);changeMoney(target,cashGive)}if(cashReceive){changeMoney(target,-cashReceive);changeMoney(me,cashReceive)}
+  if(give!=null&&S.props[give].mortgaged)chargeSingleMortgageInterest(target,give);
+  if(receive!=null&&S.props[receive].mortgaged)chargeSingleMortgageInterest(me,receive);
+  log(`${S.players[me].name} and ${S.players[target].name} completed a trade.`);
+  tradeDraft=null;closeModal();renderAll();
+  if(S.players[me].money<0)return setDebt(me,null,'trade mortgage interest',0);
+  if(S.players[target].money<0)return setDebt(target,null,'trade mortgage interest',0);
+  scheduleSave();
+}
+function chargeSingleMortgageInterest(owner,pos){const fee=Math.ceil(mortgageValue(pos)*0.1);if(fee>0){changeMoney(owner,-fee);log(`${S.players[owner].name} paid £${fee} mortgage interest to the bank for ${SP[pos].n}.`)}}
+function validSavedGameInStorage(){const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;try{return validSave(JSON.parse(raw))}catch(e){return false}}
+function continueGame(){
+  const raw=localStorage.getItem(SAVE_KEY);if(!raw)return;
+  let saved;try{saved=JSON.parse(raw)}catch(e){saved=null}
+  if(!validSave(saved)){alert('Saved game is from an older version and cannot be continued safely. Start a new game.');localStorage.removeItem(SAVE_KEY);$('continueBtn').style.display='none';return}
+  S=saved;if(!S.options)S.options={auction:true,parking:false,build:'soldout'};S.options.auction=true;S.options.parking=false;
+  $('setup').classList.remove('active');$('game').classList.add('active');buildBoard();buildTokens();renderAll();
+  if(S.phase==='auction'&&S.auction)renderAuctionModal();
+  if(S.phase==='debt')showDebt();
+}
+
+function renderCenter(){
+  const p=S.players[S.cur];
+  const panel=$('propertyPanel');
+  $('turnName').textContent=`${p.name}'s turn`;
+  $('turnName').style.color=p.color;
+  $('turnName').style.borderColor=p.color;
+  $('instruction').textContent=instruction();
+  const a=$('actions');a.className='action-grid';a.innerHTML='';
+  if(panel){panel.innerHTML='';panel.classList.remove('active')}
+  if(S.phase==='ready'){
+  }else if(S.phase==='buy'){
+    const pos=S.pending.pos,sp=SP[pos];
+    if(panel){panel.innerHTML=propertyBuyCard(pos);panel.classList.add('active')}
+    a.innerHTML=`<button class="buy" onclick="Game.buy()">Buy £${sp.price}</button><button class="auction" onclick="Game.auctionStart()">Send to Auction</button>`;
+  }else if(S.phase==='rent'){
+    const q=activeRentPending();
+    if(panel&&q){panel.innerHTML=propertyRentCard(q);panel.classList.add('active')}
+    a.innerHTML=`<button class="buy" onclick="Game.payRent()">Pay £${q?q.rent:''} Rent</button>`;
+  }else if(S.phase==='auction'){
+    a.innerHTML=`<button class="auction" onclick="Game.auctionStart()">Open Auction</button>`;
+  }else if(S.phase==='jailChoice'){
+    a.innerHTML=`<button class="auction" onclick="Game.rollJailDoubles()">Roll Doubles</button><button class="buy" onclick="Game.payBail()">Pay £50</button>${p.jailFree?'<button class="auction" onclick="Game.useJailFree()">Use Card</button>':''}<button class="end" onclick="Game.endTurn()">End Turn</button>`;
+  }else if(S.phase==='done'){
+    a.innerHTML=`<button class="end" onclick="Game.endTurn()">End Turn</button><button class="pass small-action" onclick="Game.showBuild()">Buildings</button>`;
+  }else if(S.phase==='debt'){
+    a.innerHTML=`<button class="pass" onclick="Game.showDebt()">Resolve Debt</button>`;
+  }else if(S.phase==='ended'){
+    a.innerHTML=`<button class="end" onclick="Game.resetToSetup()">New Game</button>`;
+  }
+}
+function instruction(){if(S.phase==='ready')return S.players[S.cur].jail?'Roll doubles, pay £50, or use card.':'Tap the dice to roll.';if(S.phase==='buy')return 'Buy this property or send it to auction.';if(S.phase==='auction')return 'Auction in progress.';if(S.phase==='rent')return 'Confirm the rent payment.';if(S.phase==='jailChoice')return `Jail turn ${Math.min((S.players[S.cur].jailTurns||0)+1,3)}/3: roll doubles, pay £50, or use a card.`;if(S.phase==='done')return 'End your turn.';if(S.phase==='debt')return 'Resolve debt before play continues.';return 'Play.'}
+function passBuy(){return auctionStart()}
+function buy(){const q=S.pending;if(!q)return;const sp=SP[q.pos],p=S.players[S.cur];if(p.money<sp.price){log(`${p.name} does not have enough cash to buy ${sp.n}. The property must be auctioned.`);return auctionStart()}changeMoney(S.cur,-sp.price);S.props[q.pos].owner=S.cur;log(`${p.name} bought ${sp.n} for £${sp.price}.`);S.phase=q.doubles?'ready':'done';S.rolled=!q.doubles;S.pending=null;renderAll();scheduleSave()}
+function landOn(doubles=false){
+  const p=S.players[S.cur],sp=SP[p.pos],pd=S.props[p.pos];renderAll();
+  if(sp.t==='gotojail')return goJail(S.cur);
+  if(sp.t==='tax'){payBank(S.cur,sp.tax);return}
+  if(sp.t==='ch'||sp.t==='cc')return drawCard(sp.t);
+  if(pd){
+    if(pd.owner==null){S.phase='buy';S.pending={pos:p.pos,doubles};renderAll();return}
+    if(pd.owner!==S.cur&&!pd.mortgaged){S.phase='rent';S.pending={pos:p.pos,doubles,rent:rentFor(p.pos),from:S.cur,to:pd.owner};renderAll();log(`${p.name} owes ${S.players[pd.owner].name} £${S.pending.rent} for ${sp.n}.`);return}
+  }
+  if(doubles){S.rolled=false;log(`${p.name} rolled doubles. Roll again.`)}else S.phase='done';renderAll();scheduleSave()
+}
+function payEachPlayer(from,amount){
+  const recipients=S.players.map((p,i)=>i).filter(i=>i!==from&&!S.players[i].bankrupt);
+  const total=recipients.length*amount;
+  if(S.players[from].money>=total){recipients.forEach(i=>changeMoney(i,amount));changeMoney(from,-total);log(`${S.players[from].name} paid £${amount} to each player.`);return}
+  changeMoney(from,-total);log(`${S.players[from].name} owes £${total} to the other players and must resolve debt.`);setDebt(from,null,'card payment',total);
+}
+function collectFromEachPlayer(to,amount){
+  const payers=S.players.map((p,i)=>i).filter(i=>i!==to&&!S.players[i].bankrupt);
+  for(const i of payers){
+    if(S.players[i].money>=amount){changeMoney(i,-amount);changeMoney(to,amount)}
+    else{changeMoney(i,-amount);log(`${S.players[i].name} owes ${S.players[to].name} £${amount}.`);setDebt(i,to,'card payment',amount);return}
+  }
+  log(`${S.players[to].name} collected £${amount} from each player.`);
+}
+function showRules(){modal('<h2>Rules</h2><p>OG rules are locked: auctions are mandatory when a property is not bought, Free Parking has no jackpot, rent is not collected on mortgaged property, mortgaged property transfers with 10% bank interest, and bankrupt players cannot continue.</p><p>The only custom rule kept is building unlock: you may choose full colour set or colour sold out at setup. Building and selling still follow even-build/even-sell and the 32-house / 12-hotel bank limits.</p><div class="modal-actions"><button class="ghost-btn" onclick="Game.closeModal()">Close</button></div>',true)}
+
+function mortgageTransferInterestForPositions(owner,positions){return positions.reduce((sum,pos)=>sum+(S.props[pos]&&S.props[pos].mortgaged?Math.ceil(mortgageValue(pos)*0.1):0),0)}
+function transferOrReleaseAssets(from,creditor){
+  const moved=owned(from);
+  if(creditor!=null&&!S.players[creditor].bankrupt){moved.forEach(pos=>{S.props[pos].owner=creditor;});}
+  else{moved.forEach(pos=>{const pd=S.props[pos];pd.owner=null;pd.houses=0;pd.hotel=false;pd.mortgaged=false;});}
+  return moved;
+}
+function declareBankruptcy(i){
+  const p=S.players[i];if(!p||p.bankrupt)return;
+  const d=S.debt,creditor=debtCreditor();
+  closeModal();
+  sellAllBuildingsForBankruptcy(i);
+  if(creditor!=null&&!S.players[creditor].bankrupt){
+    const cash=Math.max(0,p.money+(d&&d.amount?d.amount:0));
+    if(cash>0){changeMoney(creditor,cash);log(`${S.players[creditor].name} received £${cash} remaining cash from ${p.name}.`)}
+    const moved=transferOrReleaseAssets(i,creditor);
+    const interest=mortgageTransferInterestForPositions(creditor,moved);
+    if(interest>0){changeMoney(creditor,-interest);log(`${S.players[creditor].name} paid £${interest} mortgage interest to the bank for transferred mortgaged properties.`)}
+  }else{
+    transferOrReleaseAssets(i,null);
+    log(`${p.name}'s properties returned to the bank.`);
+  }
+  p.bankrupt=true;p.money=0;p.jail=false;p.jailTurns=0;p.jailFree=0;p.jailCards=[];S.debt=null;S.pending=null;S.auction=null;
+  log(`${p.name} declared bankruptcy${creditor!=null?` to ${S.players[creditor].name}`:' to the bank'}.`);
+  renderAll();
+  if(creditor!=null&&!S.players[creditor].bankrupt&&S.players[creditor].money<0){setDebt(creditor,null,'mortgage interest',0);return}
+  if(checkWinner())return;
+  let next=(i+1)%S.players.length;while(S.players[next].bankrupt)next=(next+1)%S.players.length;
+  if(next<=i)S.round++;S.cur=next;S.turn++;S.rolled=false;S.phase='ready';
+  log(`${S.players[S.cur].name}, your turn.`);renderAll();scheduleSave();
+}
+function highlightOwner(i){document.querySelectorAll('[data-pos]').forEach(el=>el.style.opacity='1');owned(i).forEach(pos=>{const el=document.querySelector(`[data-pos="${pos}"]`);if(el){el.style.filter='drop-shadow(0 0 7px '+S.players[i].color+')';setTimeout(()=>el.style.filter='',1200)}})}
+function modal(html,canClose=true){$('modalCard').innerHTML=(canClose?'<button class="close" aria-label="Close modal" onclick="Game.closeModal()">×</button>':'')+html;$('modal').dataset.canClose=canClose?'1':'0';$('modal').classList.add('open');applyA11y($('modalCard'))}function closeModal(){$('modal').classList.remove('open')}function backdrop(e){if(e.target.id==='modal'&&$('modal').dataset.canClose==='1')closeModal()}
+function resetToSetup(){if(!confirm('Start a new game? Current saved game will stay unless cleared.'))return;S.started=false;$('game').classList.remove('active');$('setup').classList.add('active');drawSetup()}
+window.Game={pickToken,startGame,continueGame,clearSave,rollDice,rollJailDoubles,buy,passBuy,auctionStart,auctionBid,auctionPass,payRent,payBail,useJailFree,endTurn,beginTurn,showBuild,build,sellBuild,showPlayerActions,showTrade,openTrade,selectTrade,executeTrade,showAssets,showDeed,showHistory,showRules,closeModal,backdrop,resetToSetup,declareBankruptcy,showDebt,sellDebtBuilding,mortgageDebtProperty,mortgageProperty,unmortgageProperty,applyCard};
+drawSetup();$('continueBtn').style.display=validSavedGameInStorage()?'block':'none';applyA11y(document);
+})();
+</script>
+</body>
+</html>
